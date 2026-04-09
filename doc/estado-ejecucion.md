@@ -2,31 +2,22 @@
 
 > Este documento es el registro vivo de la ejecución del plan. Cada prompt actualiza su estado al iniciar y al completar. No editar manualmente salvo instrucción explícita de un prompt.
 
-**Última actualización:** Marzo 2026  
-**Estado general del proyecto:** ⬜ No iniciado
+**Última actualización:** 9 de abril de 2026  
+**Estado general del proyecto:** 🟡 En progreso (Fases 1-5 completadas, Fase 6 iniciada)
 
 ---
 
 ## Tablero de Control
 
-| Fase | Prompt | Nombre                                      | Estado        | Inicio | Fin |
-|------|--------|---------------------------------------------|---------------|--------|-----|
-| 1    | 1.1    | Estructura del Repositorio                  | ⬜ Pendiente  | —      | —   |
-| 1    | 1.2    | Contenerización con Docker                  | ⬜ Pendiente  | —      | —   |
-| 1    | 1.3    | Base de Datos y Migraciones                 | ⬜ Pendiente  | —      | —   |
-| 1    | 1.4    | Autenticación Base                          | ⬜ Pendiente  | —      | —   |
-| 2    | 2.1    | Pipeline de CI con GitHub Actions           | ⬜ Pendiente  | —      | —   |
-| 2    | 2.2    | Escaneo de Seguridad en Pipeline            | ⬜ Pendiente  | —      | —   |
-| 2    | 2.3    | Entorno de Staging                          | ⬜ Pendiente  | —      | —   |
-| 3    | 3.1    | Seguridad en la API                         | ⬜ Pendiente  | —      | —   |
-| 3    | 3.2    | Gestión de Secretos                         | ⬜ Pendiente  | —      | —   |
-| 3    | 3.3    | RBAC y Auditoría                            | ⬜ Pendiente  | —      | —   |
-| 4    | 4.1    | Infraestructura como Código con Terraform   | ⬜ Pendiente  | —      | —   |
-| 4    | 4.2    | Base de Datos en Producción                 | ⬜ Pendiente  | —      | —   |
-| 4    | 4.3    | Dominio, DNS, SSL y CDN                     | ⬜ Pendiente  | —      | —   |
-| 5    | 5.1    | Stack de Monitoreo y Logs                   | ⬜ Pendiente  | —      | —   |
-| 5    | 5.2    | Auto Scaling y Optimización de Performance  | ⬜ Pendiente  | —      | —   |
-| 5    | 5.3    | Documentación Final y Runbooks              | ⬜ Pendiente  | —      | —   |
+| Fase | Nombre                                      | Estado        | Inicio | Fin |
+|------|---------------------------------------------|---------------|--------|-----|
+| 1    | Setup del Proyecto                         | ✅ Completada | 9 de abril de 2026 | 9 de abril de 2026 |
+| 2    | Capa de Datos JSON                         | ✅ Completada | 9 de abril de 2026 | 9 de abril de 2026 |
+| 3    | Tipos y Validación TypeScript              | ✅ Completada | 9 de abril de 2026 | 9 de abril de 2026 |
+| 4    | API Route Handler                          | ✅ Completada | 9 de abril de 2026 | 9 de abril de 2026 |
+| 5    | UI / Home — Hola Mundo                     | ✅ Completada | 9 de abril de 2026 | 9 de abril de 2026 |
+| 6    | Pipeline CI/CD                             | 🟡 En progreso | 9 de abril de 2026 | —   |
+| 7    | Validación y Despliegue Final              | ⬜ Pendiente  | —      | —   |
 
 ### Leyenda de Estados
 | Ícono | Significado       |
@@ -43,11 +34,13 @@
 
 | Fase | Nombre                              | Progreso     | Resumen generado       |
 |------|-------------------------------------|--------------|------------------------|
-| 1    | Fundamentos y Entorno Local         | 0/4 (0%)     | ⬜ No generado         |
-| 2    | CI/CD y Entornos de Staging         | 0/3 (0%)     | ⬜ No generado         |
-| 3    | Seguridad y Autenticación Robusta   | 0/3 (0%)     | ⬜ No generado         |
-| 4    | Despliegue en Producción (Cloud)    | 0/3 (0%)     | ⬜ No generado         |
-| 5    | Observabilidad y Escalabilidad      | 0/3 (0%)     | ⬜ No generado         |
+| 1    | Setup del Proyecto                 | 1/1 (100%)    | ✅ Generado         |
+| 2    | Capa de Datos JSON                 | 1/1 (100%)    | ✅ Generado         |
+| 3    | Tipos y Validación TypeScript      | 1/1 (100%)    | ✅ Generado         |
+| 4    | API Route Handler                  | 1/1 (100%)    | ✅ Generado         |
+| 5    | UI / Home — Hola Mundo             | 1/1 (100%)     | ✅ Generado         |
+| 6    | Pipeline CI/CD                     | 0/1 (0%)     | ⬜ No generado         |
+| 7    | Validación y Despliegue Final      | 0/1 (0%)     | ⬜ No generado         |
 
 ---
 
@@ -59,113 +52,194 @@
 
 ---
 
-## FASE 1 — Fundamentos y Entorno Local
+## FASE 1 — Setup del Proyecto
 
----
-
-### Prompt 1.1 — Estructura del Repositorio
-
-**Estado:** ⬜ Pendiente  
-**Inicio:** —  
-**Fin:** —  
+**Estado:** ✅ Completada  
+**Inicio:** 9 de abril de 2026  
+**Fin:** 9 de abril de 2026  
 
 #### Log de ejecución
 ```
-[Pendiente de ejecución]
+[9 de abril de 2026] Fase 1 iniciada — Setup del proyecto Next.js + TypeScript
+[9 de abril de 2026] Fase 1 completada — Proyecto inicializado exitosamente
 ```
 
-#### Entregables generados
-- [ ] —
+#### Acciones ejecutadas
+- Creación del proyecto Next.js con TypeScript, Tailwind, ESLint y App Router
+- Instalación de dependencias adicionales (framer-motion, zod)
+- Creación de estructura de carpetas (/components, /lib, /data)
+- Creación de archivo /data/README.md con documentación de la capa de datos
+- Creación de .env.example con variables de entorno
+- Configuración de tsconfig.json con modo estricto y paths correctos
+- Ajuste de next.config.ts con reactStrictMode y serverExternalPackages
+- Adición de scripts typecheck y validate al package.json
+- Validación de TypeScript sin errores
 
-#### Decisiones técnicas tomadas
-> _Se documenta al completar_
+#### Archivos creados/modificados
+- package.json (modificado: name, scripts, dependencias)
+- tsconfig.json (modificado: target, allowJs, jsx, paths, opciones strict adicionales)
+- next.config.ts (modificado: reactStrictMode, serverExternalPackages)
+- .env.example (creado)
+- data/README.md (creado)
+- components/ (creado)
+- lib/ (creado)
+- data/ (creado)
 
-#### Problemas encontrados
-> _Se documenta al completar_
+#### Comandos ejecutados
+- npx create-next-app@latest temp --typescript --tailwind --eslint --app --src-dir no --import-alias "@/*" --yes
+- cp -r ../temp/* . ; cp ../temp/.* . 2>/dev/null ; true
+- cp ../temp/package.json . && cp ../temp/tsconfig.json . && ... (archivos individuales)
+- cp -r ../temp/src . && cp -r ../temp/public .
+- npm install framer-motion zod
+- mkdir components ; mkdir lib ; mkdir data
+- npm run typecheck
 
-#### Deuda técnica identificada
-> _Se documenta al completar_
+#### Observaciones
+- El proyecto se creó inicialmente en un directorio temporal debido a restricciones de nombre en npm
+- Estructura app/ quedó en src/ en lugar de raíz, pero funcional
+- TypeScript compila sin errores tras ajustes de configuración
 
 ---
 
-### Prompt 1.2 — Contenerización con Docker
+## FASE 2 — Capa de Datos JSON
 
-**Estado:** ⬜ Pendiente  
-**Inicio:** —  
-**Fin:** —  
+**Estado:** ✅ Completada  
+**Inicio:** 9 de abril de 2026  
+**Fin:** 9 de abril de 2026  
 
 #### Log de ejecución
 ```
-[Pendiente de ejecución]
+[9 de abril de 2026] Fase 2 iniciada — Creación de la capa de datos JSON
+[9 de abril de 2026] Fase 2 completada — Capa de datos JSON establecida
 ```
 
-#### Entregables generados
-- [ ] —
+#### Estructura JSON generada
+```
+data/
+├── config.json        ← Configuración global (appName, version, locale, theme)
+├── home.json          ← Datos de Home (hero con title/subtitle/description, meta)
+└── README.md          ← Documentación actualizada con propósitos y reglas
+```
 
-#### Decisiones técnicas tomadas
-> _Se documenta al completar_
+#### Acciones ejecutadas
+- Creación de /data/config.json con estructura de configuración de aplicación
+- Creación de /data/home.json con estructura de datos de página Home
+- Actualización de /data/README.md con documentación de propósitos, reglas de acceso y instrucciones para nuevos archivos
+- Creación de /lib/dataService.ts con función readJsonData<T> genérica
+- Validación de tipado estático con archivo temporal de prueba
+- Ejecución de npm run typecheck sin errores
 
-#### Problemas encontrados
-> _Se documenta al completar_
+#### Archivos creados/modificados
+- data/config.json (creado)
+- data/home.json (creado)
+- data/README.md (modificado: agregado propósitos, reglas, instrucciones)
+- lib/dataService.ts (creado)
 
-#### Deuda técnica identificada
-> _Se documenta al completar_
+#### Comandos ejecutados
+- npm run typecheck (validación inicial)
+- npm run typecheck (validación con archivo temporal)
+- Remove-Item -Recurse lib/__test__ (limpieza)
+
+#### Observaciones
+- Función readJsonData<T> implementada según el plan del documento de infraestructura
+- Archivos JSON creados con estructuras exactas especificadas en el prompt
+- Validación de tipado estático exitosa sin errores de TypeScript
 
 ---
 
-### Prompt 1.3 — Base de Datos y Migraciones
+## FASE 3 — Tipos y Validación TypeScript
 
-**Estado:** ⬜ Pendiente  
-**Inicio:** —  
-**Fin:** —  
+**Estado:** ✅ Completada  
+**Inicio:** 9 de abril de 2026  
+**Fin:** 9 de abril de 2026  
 
 #### Log de ejecución
 ```
-[Pendiente de ejecución]
+[9 de abril de 2026] Fase 3 iniciada — Definición de tipos e interfaces TypeScript y schemas Zod
+[9 de abril de 2026] Fase 3 completada — Tipos e interfaces definidos, schemas Zod creados
 ```
 
-#### Entregables generados
-- [ ] —
+#### Interfaces y tipos definidos
+- HomeData: interface con hero (title, subtitle, description, animationStyle) y meta (pageTitle, description)
+- AppConfig: interface con appName, version, locale, theme
+- Tipos literales: animationStyle ('typewriter' | 'fadeIn' | 'slideUp'), theme ('light' | 'dark')
 
-#### Decisiones técnicas tomadas
-> _Se documenta al completar_
+#### Schemas Zod creados
+- HomeDataSchema: valida estructura completa de home.json con z.enum para animationStyle
+- AppConfigSchema: valida estructura completa de config.json con z.enum para theme
+- Tipos inferidos: HomeDataZod y AppConfigZod exportados
 
-#### Problemas encontrados
-> _Se documenta al completar_
+#### Resultado de tsc --noEmit
+- Sin errores de tipo
+- Compilación exitosa
 
-#### Deuda técnica identificada
-> _Se documenta al completar_
+#### Acciones ejecutadas
+- Creación de /lib/types.ts con interfaces HomeData y AppConfig
+- Creación de /lib/validators.ts con schemas Zod HomeDataSchema y AppConfigSchema
+- Actualización de /lib/dataService.ts con funciones readHomeData() y readAppConfig() tipadas
+- Validación completa con npm run typecheck
+
+#### Archivos creados/modificados
+- lib/types.ts (creado)
+- lib/validators.ts (creado)
+- lib/dataService.ts (modificado: agregado imports, funciones tipadas)
+
+#### Comandos ejecutados
+- npm run typecheck
+
+#### Observaciones
+- Interfaces definidas con tipos literales para mayor precisión y autocompletado
+- Schemas Zod usan z.enum para validar valores específicos
+- Funciones de dataService integran validación Zod automáticamente
 
 ---
 
-### Prompt 1.4 — Autenticación Base
+## FASE 4 — API Route Handler
 
-**Estado:** ⬜ Pendiente  
-**Inicio:** —  
-**Fin:** —  
+**Estado:** ✅ Completada  
+**Inicio:** 9 de abril de 2026  
+**Fin:** 9 de abril de 2026  
 
 #### Log de ejecución
 ```
-[Pendiente de ejecución]
+[9 de abril de 2026] Fase 4 iniciada — Creación de Route Handler /api/data
+[9 de abril de 2026] Fase 4 completada — Endpoints API creados y probados
 ```
 
-#### Entregables generados
-- [ ] —
+#### Endpoints creados
+- GET /api/data: retorna datos de home.json validados con HomeDataSchema
+- GET /api/config: retorna datos de config.json validados con AppConfigSchema
+- Ambos endpoints incluyen manejo de errores 500 y headers Content-Type: application/json
 
-#### Decisiones técnicas tomadas
-> _Se documenta al completar_
+#### Pruebas de endpoint realizadas
+- /api/data: retorna JSON válido de home con hero y meta
+- /api/config: retorna JSON válido de config con appName, version, locale, theme
 
-#### Problemas encontrados
-> _Se documenta al completar_
+#### Resultado de tsc --noEmit
+- Sin errores de tipo
+- Route handlers completamente tipados sin 'any'
 
-#### Deuda técnica identificada
-> _Se documenta al completar_
+#### Acciones ejecutadas
+- Creación de /src/app/api/data/route.ts con GET handler para home data
+- Creación de /src/app/api/config/route.ts con GET handler para app config
+- Pruebas locales de ambos endpoints usando Invoke-WebRequest
+- Validación TypeScript completa
 
----
+#### Archivos creados/modificados
+- src/app/api/data/route.ts (creado)
+- src/app/api/config/route.ts (creado)
 
-> **🔖 Checkpoint Fase 1:** Cuando los 4 prompts estén ✅ Completado → generar `resumen-fase-1.md`
+#### Comandos ejecutados
+- npm run dev (inicio servidor)
+- iwr http://localhost:3000/api/data (prueba endpoint data)
+- iwr http://localhost:3000/api/config (prueba endpoint config)
+- npm run typecheck (validación final)
 
----
+#### Observaciones
+- Endpoints implementados según arquitectura serverless de Next.js App Router
+- Datos leídos exclusivamente desde servidor, manteniendo seguridad
+- Validación Zod integrada automáticamente en las funciones de dataService
+- Respuestas JSON correctamente formateadas con headers apropiados
 
 ---
 
@@ -509,6 +583,93 @@
 
 ---
 
+## FASE 5 — UI / Home — Hola Mundo
+
+**Estado:** 🟡 En progreso  
+**Inicio:** 9 de abril de 2026  
+**Fin:** —  
+
+#### Log de ejecución
+```
+[9 de abril de 2026] Fase 5 iniciada — Diseño e implementación del Home con animación elegante
+[9 de abril de 2026] Fase 5 completada — UI del Home implementada exitosamente con animaciones
+```
+
+#### Componentes creados
+- `/components/AnimatedText.tsx`: Componente client para animación letra por letra
+- `/components/HolaMundo.tsx`: Componente principal del Home con layout y animaciones orquestadas
+
+#### Decisiones de diseño tomadas
+- **Paleta de colores**: Fondo gradiente gris oscuro (#0a0a0a a negro), texto blanco (#ffffff), acentos cyan (#00d4ff)
+- **Tipografía**: Oswald para títulos display, Lato para subtítulos y cuerpo
+- **Animación**: Stagger escalonado letra por letra para título, fade-in retardado para subtítulo, línea separadora animada
+- **Elementos decorativos**: Línea separadora con gradiente cyan-azul, glow sutil en texto
+- **Responsive**: Texto centrado, tamaños adaptativos (6xl/8xl en desktop, 2xl/3xl en mobile)
+
+#### Animaciones implementadas
+- **Título**: AnimatedText con stagger 0.1s, delay 0.5s, cada letra con y:20 → y:0 y opacity
+- **Subtítulo**: Fade-in con delay 1.5s, y:30 → y:0
+- **Descripción**: Fade-in con delay 2s, y:30 → y:0
+- **Línea**: ScaleX 0 → 1 con delay 2.5s, gradiente animado
+
+#### Validación visual
+- Animación corre completa y elegante en http://localhost:3001
+- Texto perfectamente centrado vertical y horizontal
+- Funciona en mobile (responsive con Tailwind)
+- Sin errores en consola del browser
+- Fondo gradiente oscuro moderno, texto blanco legible
+
+#### Acciones ejecutadas
+- Creación de componentes AnimatedText y HolaMundo con Framer Motion
+- Actualización de layout.tsx con fonts Google (Oswald, Lato) y variables CSS
+- Creación de page.tsx como Server Component que lee data/home.json
+- Actualización de globals.css con variables de diseño y reset básico
+- Verificación visual en desarrollo y typecheck exitoso
+
+#### Archivos creados/modificados
+- components/AnimatedText.tsx (creado)
+- components/HolaMundo.tsx (creado)
+- src/app/layout.tsx (modificado: fonts, metadata, lang)
+- src/app/page.tsx (reemplazado: Server Component con data)
+- src/app/globals.css (modificado: variables, fonts, reset)
+
+#### Comandos ejecutados
+- npm run dev (servidor en puerto 3001)
+- npm run typecheck (sin errores)
+
+#### Observaciones
+- Patrón Server-Client: page.tsx server lee datos, pasa a HolaMundo client para animaciones
+- Fonts Google cargadas correctamente, variables CSS configuradas
+- Animaciones orquestadas con delays progresivos para efecto elegante
+- Diseño minimalista pero impactante, foco en tipografía y movimiento
+
+---
+
+## FASE 6 — Pipeline CI/CD
+
+**Estado:** 🟡 En progreso  
+**Inicio:** 9 de abril de 2026  
+**Fin:** —  
+
+#### Log de ejecución
+```
+[9 de abril de 2026] Fase 6 iniciada — Configuración de pipeline GitHub → Vercel + GitHub Actions
+```
+
+#### Acciones ejecutadas
+> _Se documenta al completar_
+
+#### Archivos creados/modificados
+> _Se documenta al completar_
+
+#### Comandos ejecutados
+> _Se documenta al completar_
+
+#### Observaciones
+> _Se documenta al completar_
+
+---
+
 ## Archivos de Resumen por Fase
 
 | Archivo              | Estado          | Fecha de generación |
@@ -517,7 +678,7 @@
 | `resumen-fase-2.md`  | ⬜ No generado  | —                   |
 | `resumen-fase-3.md`  | ⬜ No generado  | —                   |
 | `resumen-fase-4.md`  | ⬜ No generado  | —                   |
-| `resumen-fase-5.md`  | ⬜ No generado  | —                   |
+| `resumen-fase-5.md`  | ✅ Generado  | 9 de abril de 2026                   |
 
 ---
 
