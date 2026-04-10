@@ -28,7 +28,7 @@ export default function HolaMundo({ title, subtitle, description }: HolaMundoPro
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.5, ease: 'easeOut' }}
-          className="text-2xl md:text-3xl text-cyan-400 mb-8 font-secondary"
+          className="text-2xl md:text-3xl text-cyan-400 mb-4 font-secondary"
         >
           {subtitle}
         </motion.h2>
