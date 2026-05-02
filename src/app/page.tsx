@@ -1,20 +1,28 @@
-import { Metadata } from 'next';
-import { readHomeData } from '@/lib/dataService';
-import HolaMundo from '@/components/HolaMundo';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Home | Mi App',
-  description: 'Página principal del sistema',
-};
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const homeData = readHomeData();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Verificar si hay token de autenticación
+    const token = document.cookie.includes('auth-token');
+
+    if (token) {
+      router.push('/dashboard');
+    } else {
+      router.push('/login');
+    }
+  }, [router]);
 
   return (
-    <HolaMundo
-      title={homeData.hero.title}
-      subtitle={homeData.hero.subtitle}
-      description={homeData.hero.description}
-    />
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto mb-4"></div>
+        <p className="text-gray-600">Redirigiendo...</p>
+      </div>
+    </div>
   );
 }

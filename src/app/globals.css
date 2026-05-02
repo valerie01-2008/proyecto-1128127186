@@ -1,16 +1,30 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --accent: #00d4ff;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-display: var(--font-display);
-  --font-secondary: var(--font-secondary);
+  /* Paleta de colores AgendaPro */
+  --color-bg-primary: #FAFAFA;
+  --color-bg-card: #FFFFFF;
+  --color-bg-alt: #F5F3FF;
+  --color-primary: #7C3AED;
+  --color-accent: #EC4899;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-border: #E5E7EB;
+  --color-category-personal: #7C3AED;
+  --color-category-work: #2563EB;
+  --color-category-health: #059669;
+  --color-category-education: #D97706;
+  --color-category-other: #6B7280;
+  --color-priority-normal: #6B7280;
+  --color-priority-high: #F59E0B;
+  --color-priority-urgent: #EF4444;
+  --color-notification-delivered: #10B981;
+  --color-notification-failed: #EF4444;
+  --color-notification-retrying: #F59E0B;
+  --color-banner-seed-bg: #FEF3C7;
+  --color-banner-seed-text: #92400E;
+  --color-banner-seed-border: #F59E0B;
 }
 
 * {
@@ -20,17 +34,17 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-secondary), sans-serif;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: 'Inter', sans-serif;
   line-height: 1.6;
   min-height: 100vh;
 }
 
-.font-display {
-  font-family: var(--font-display), sans-serif;
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
 }
 
-.font-secondary {
-  font-family: var(--font-secondary), sans-serif;
+button {
+  font-family: 'Inter', sans-serif;
 }
