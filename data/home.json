@@ -1,12 +1,12 @@
 {
   "hero": {
-    "title": "Hola Mundo",
-    "subtitle": "Valerie Samper",
-    "description": "Documento: 1128127186",
+    "title": "AgendaPro",
+    "subtitle": "Gestión Inteligente de Agenda",
+    "description": "Tu plataforma de productividad personal con motor automático de recordatorios",
     "animationStyle": "typewriter"
   },
   "meta": {
-    "pageTitle": "Home | Mi App",
-    "description": "Página principal del sistema"
+    "pageTitle": "AgendaPro — Gestión de agenda y recordatorios",
+    "description": "AgendaPro es la plataforma de productividad personal con motor automático de recordatorios"
   }
 }
