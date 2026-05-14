@@ -7,21 +7,15 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Verificar si hay token de autenticación
-    const token = document.cookie.includes('auth-token');
-
-    if (token) {
-      router.push('/dashboard');
-    } else {
-      router.push('/login');
-    }
+    // Redirigir al dashboard por defecto
+    router.push('/dashboard');
   }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto mb-4"></div>
-        <p className="text-gray-600">Redirigiendo...</p>
+        <p className="text-gray-600">Cargando AgendaPro...</p>
       </div>
     </div>
   );
