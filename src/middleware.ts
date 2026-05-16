@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const AUTH_COOKIE_NAME = 'agendaProSession';
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -17,7 +19,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Verificar si hay cookie de autenticación
-  const token = request.cookies.get('auth-token')?.value;
+  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
 
   if (!token) {
     // Redirigir a login si no hay token

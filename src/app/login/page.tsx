@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,19 +18,25 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          password,
+          ...(isRegistering && { name }),
+        }),
       });
+
+      const data = await response.json();
 
       if (response.ok) {
         router.push('/dashboard');
       } else {
-        setError('Credenciales inválidas');
+        setError(data.error || 'Error en autenticación');
       }
     } catch (err) {
-      setError('Error al iniciar sesión');
+      setError('Error al conectar con el servidor');
       console.error(err);
     } finally {
       setLoading(false);
@@ -50,7 +58,40 @@ export default function LoginPage() {
             <p className="text-gray-300">Gestión de agenda inteligente</p>
           </div>
 
+          <div className="mb-4 flex gap-2 border-b border-white/20">
+            <button
+              type="button"
+              onClick={() => setIsRegistering(false)}
+              className={`flex-1 py-2 font-semibold transition-colors ${!isRegistering ? 'text-yellow-300 border-b-2 border-yellow-300' : 'text-gray-400 hover:text-white'}`}
+            >
+              Ingresar
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsRegistering(true)}
+              className={`flex-1 py-2 font-semibold transition-colors ${isRegistering ? 'text-yellow-300 border-b-2 border-yellow-300' : 'text-gray-400 hover:text-white'}`}
+            >
+              Registrarse
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
+            {isRegistering && (
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Nombre
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 text-white placeholder-gray-400 backdrop-blur"
+                  placeholder="Tu nombre"
+                  required={isRegistering}
+                />
+              </div>
+            )}
+
             <div>
               <label className="block text-white font-semibold mb-2">
                 Email
@@ -90,7 +131,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-gradient-to-r from-yellow-300 to-pink-300 text-violet-700 py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-yellow-300/50 disabled:opacity-50 transition-all duration-300"
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {loading ? (isRegistering ? 'Creando cuenta...' : 'Iniciando sesión...') : (isRegistering ? 'Crear cuenta' : 'Iniciar sesión')}
             </button>
           </form>
 
