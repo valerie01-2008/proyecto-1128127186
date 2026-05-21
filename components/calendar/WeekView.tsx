@@ -21,7 +21,7 @@ interface WeekViewProps {
 }
 
 const CATEGORY_COLORS = {
-  personal: 'bg-violet-500',
+  personal: 'bg-violet-300',
   trabajo: 'bg-blue-500',
   salud: 'bg-green-500',
   educacion: 'bg-amber-500',
