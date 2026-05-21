@@ -196,7 +196,7 @@ function QuotaModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
               </button>
               <a
                 href="/events?status=completado"
-                className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
+                className="px-4 py-2 bg-violet-400 text-white rounded-lg hover:bg-violet-500"
               >
                 Gestionar eventos completados
               </a>

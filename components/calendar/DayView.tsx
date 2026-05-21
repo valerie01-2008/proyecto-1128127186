@@ -22,11 +22,11 @@ interface DayViewProps {
 }
 
 const CATEGORY_COLORS = {
-  personal: 'bg-violet-500',
-  trabajo: 'bg-blue-500',
-  salud: 'bg-green-500',
-  educacion: 'bg-amber-500',
-  otro: 'bg-gray-500',
+  personal: 'bg-violet-300',
+  trabajo: 'bg-blue-300',
+  salud: 'bg-green-300',
+  educacion: 'bg-amber-300',
+  otro: 'bg-gray-300',
 };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);

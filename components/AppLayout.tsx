@@ -63,7 +63,7 @@ export function AppLayout({ children, userRole }: AppLayoutProps) {
                   href={item.href}
                   className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-violet-50 text-violet-700 border-r-2 border-violet-500'
+                      ? 'bg-violet-100 text-violet-600 border-r-2 border-violet-300'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                   onClick={() => setSidebarOpen(false)}
