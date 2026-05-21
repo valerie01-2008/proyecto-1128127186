@@ -21,10 +21,10 @@ export function Button({
   type = 'button',
   className = '',
 }: ButtonProps) {
-  const baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-violet-300 to-pink-200 text-gray-700 hover:from-violet-400 hover:to-pink-300',
+    primary: 'bg-gradient-to-r from-violet-500 to-pink-400 text-white hover:from-violet-600 hover:to-pink-500',
     secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
     outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
   };

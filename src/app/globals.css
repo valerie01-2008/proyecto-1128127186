@@ -4,22 +4,22 @@
 
 :root {
   /* Paleta de colores AgendaPro */
-  --color-bg-primary: #F8F6FF;
+  --color-bg-primary: #FAFAFA;
   --color-bg-card: #FFFFFF;
   --color-bg-alt: #F5F3FF;
-  --color-primary: #D8B4FE;
-  --color-accent: #FBCFE8;
-  --color-text-primary: #374151;
-  --color-text-secondary: #9CA3AF;
+  --color-primary: #8B5CF6;
+  --color-accent: #EC4899;
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
   --color-border: #E5E7EB;
-  --color-category-personal: #D8B4FE;
-  --color-category-work: #BFDBFE;
-  --color-category-health: #A7F3D0;
-  --color-category-education: #FED7AA;
-  --color-category-other: #D1D5DB;
-  --color-priority-normal: #D1D5DB;
-  --color-priority-high: #FED7AA;
-  --color-priority-urgent: #FCA5A5;
+  --color-category-personal: #8B5CF6;
+  --color-category-work: #3B82F6;
+  --color-category-health: #10B981;
+  --color-category-education: #F59E0B;
+  --color-category-other: #6B7280;
+  --color-priority-normal: #6B7280;
+  --color-priority-high: #F59E0B;
+  --color-priority-urgent: #EF4444;
   --color-notification-delivered: #10B981;
   --color-notification-failed: #EF4444;
   --color-notification-retrying: #F59E0B;
