@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import { withAuth } from '@/lib/withAuth';
 import { getEvents, createEvent } from '@/lib/dataService';
 import type { CreateEventRequest } from '@/lib/types';
@@ -45,18 +46,17 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
   } catch (error) {
     console.error('Error creating event:', error);
 
+    if (error instanceof ZodError) {
+      const first = error.issues[0];
+      const message = first ? `${first.path.join('.')}: ${first.message}` : 'Datos inválidos';
+      return NextResponse.json({ error: message, issues: error.issues }, { status: 400 });
+    }
     if (error instanceof Error) {
       if (error.message.includes('solapa')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 409 } // Conflict
-        );
+        return NextResponse.json({ error: error.message }, { status: 409 });
       }
       if (error.message.includes('límite máximo')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 429 } // Too Many Requests
-        );
+        return NextResponse.json({ error: error.message }, { status: 429 });
       }
     }
 

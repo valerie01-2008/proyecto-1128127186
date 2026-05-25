@@ -29,28 +29,38 @@ export const CreateReminderRequestSchema = z.object({
 export type HomeDataZod = z.infer<typeof HomeDataSchema>;
 export type AppConfigZod = z.infer<typeof AppConfigSchema>;
 
-export const CreateEventRequestSchema = z.object({
+// Shape base (sin refines de cross-field) para poder reusar en Update con .partial()
+const EventRequestShape = z.object({
   title: z.string().min(1).max(200),
   startAt: z.string().refine((val) => {
     const date = new Date(val);
     return date > new Date(); // RN-02: fecha futura
   }, 'La fecha debe ser futura'),
-  endAt: z.string().optional().refine((val) => {
-    if (!val) return true;
-    const start = new Date(val);
-    const end = new Date(val);
-    return end > start; // end_at debe ser después de start_at
-  }, 'La fecha de fin debe ser posterior a la de inicio'),
-  location: z.string().max(300).optional(),
-  description: z.string().optional(),
+  endAt: z.string().nullish(),
+  location: z.string().max(300).nullish(),
+  description: z.string().nullish(),
   category: z.enum(['personal', 'trabajo', 'salud', 'educacion', 'otro']),
   priority: z.enum(['normal', 'alta', 'urgente']),
   reminders: z.array(CreateReminderRequestSchema).optional(),
 });
 
-export const UpdateEventRequestSchema = CreateEventRequestSchema.partial().extend({
-  status: z.enum(['pendiente', 'completado', 'cancelado']).optional(),
-});
+// Cross-field: end_at debe ser estrictamente posterior a start_at (RN-02/RN-07).
+const endAfterStart = (data: Record<string, unknown>): boolean => {
+  const startAt = data.startAt as string | undefined;
+  const endAt = data.endAt as string | null | undefined;
+  if (!endAt || !startAt) return true;
+  return new Date(endAt).getTime() > new Date(startAt).getTime();
+};
+const endAfterStartOpts: { message: string; path: (string | number)[] } = {
+  message: 'La fecha de fin debe ser posterior a la de inicio',
+  path: ['endAt'],
+};
+
+export const CreateEventRequestSchema = EventRequestShape.refine(endAfterStart, endAfterStartOpts);
+
+export const UpdateEventRequestSchema = EventRequestShape.partial()
+  .extend({ status: z.enum(['pendiente', 'completado', 'cancelado']).optional() })
+  .refine(endAfterStart, endAfterStartOpts);
 
 export type CreateEventRequestZod = z.infer<typeof CreateEventRequestSchema>;
 export type UpdateEventRequestZod = z.infer<typeof UpdateEventRequestSchema>;
