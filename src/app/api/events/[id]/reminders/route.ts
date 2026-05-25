@@ -40,8 +40,9 @@ export const POST = withAuth(async (req: NextRequest, userId: string, context: R
     return NextResponse.json(reminder, { status: 201 });
   } catch (error) {
     console.error('Error creating reminder:', error);
-    if (error instanceof ZodError) {
-      const first = error.issues[0];
+    if (error instanceof ZodError || (error as { name?: string } | null)?.name === 'ZodError') {
+      const zErr = error as ZodError;
+      const first = zErr.issues?.[0];
       const message = first ? `${first.path.join('.')}: ${first.message}` : 'Datos inválidos';
       return NextResponse.json({ error: message }, { status: 400 });
     }

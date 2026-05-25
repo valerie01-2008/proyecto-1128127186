@@ -50,10 +50,11 @@ export const PUT = withAuth(async (request: NextRequest, userId: string, context
   } catch (error) {
     console.error('Error updating event:', error);
 
-    if (error instanceof ZodError) {
-      const first = error.issues[0];
+    if (error instanceof ZodError || (error as { name?: string } | null)?.name === 'ZodError') {
+      const zErr = error as ZodError;
+      const first = zErr.issues?.[0];
       const message = first ? `${first.path.join('.')}: ${first.message}` : 'Datos inválidos';
-      return NextResponse.json({ error: message, issues: error.issues }, { status: 400 });
+      return NextResponse.json({ error: message, issues: zErr.issues }, { status: 400 });
     }
     if (error instanceof Error && error.message.includes('solapa')) {
       return NextResponse.json({ error: error.message }, { status: 409 });

@@ -46,10 +46,13 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
   } catch (error) {
     console.error('Error creating event:', error);
 
-    if (error instanceof ZodError) {
-      const first = error.issues[0];
+    // Duck-type: Next.js empaqueta zod por route, así que `instanceof ZodError`
+    // puede dar false entre chunks distintos. Comparamos por nombre como fallback.
+    if (error instanceof ZodError || (error as { name?: string } | null)?.name === 'ZodError') {
+      const zErr = error as ZodError;
+      const first = zErr.issues?.[0];
       const message = first ? `${first.path.join('.')}: ${first.message}` : 'Datos inválidos';
-      return NextResponse.json({ error: message, issues: error.issues }, { status: 400 });
+      return NextResponse.json({ error: message, issues: zErr.issues }, { status: 400 });
     }
     if (error instanceof Error) {
       if (error.message.includes('solapa')) {
