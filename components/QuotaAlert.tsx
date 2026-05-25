@@ -4,23 +4,36 @@ interface QuotaAlertProps {
 }
 
 export function QuotaAlert({ activeEventCount, maxEvents }: QuotaAlertProps) {
-  const isNearLimit = activeEventCount >= maxEvents * 0.9;
+  const pct = Math.min(100, Math.round((activeEventCount / maxEvents) * 100));
+  if (pct < 90) return null;
 
-  if (!isNearLimit) return null;
+  const tone = pct >= 100 ? 'crimson' : 'amber';
+  const colorVar = tone === 'crimson' ? 'var(--crimson)' : 'var(--amber)';
 
   return (
-    <div className="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6">
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          <svg className="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
+    <div className="relative overflow-hidden rounded-lg border border-amber/30 bg-amber-soft mb-6">
+      <div className="absolute inset-y-0 left-0 w-1" style={{ background: colorVar }} />
+      <div className="p-4 pl-6">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <div>
+            <p
+              className="font-mono text-[11px] uppercase tracking-ticker mb-1"
+              style={{ color: colorVar }}
+            >
+              cuota al {pct}%
+            </p>
+            <p className="text-sm text-bone-1">
+              <span className="font-mono text-bone-0">{activeEventCount}</span> de{' '}
+              <span className="font-mono text-bone-0">{maxEvents}</span> eventos activos.
+              {pct >= 100 ? ' Has alcanzado el límite.' : ' Considera archivar eventos completados.'}
+            </p>
+          </div>
         </div>
-        <div className="ml-3">
-          <p className="text-sm text-orange-800">
-            <strong>Cuota próxima al límite:</strong> Tienes {activeEventCount} eventos activos de {maxEvents} permitidos.
-            Considera completar o eliminar eventos antiguos.
-          </p>
+        <div className="h-1 w-full bg-ink-3 rounded-full overflow-hidden">
+          <div
+            className="h-full transition-all duration-700"
+            style={{ width: `${pct}%`, background: colorVar }}
+          />
         </div>
       </div>
     </div>

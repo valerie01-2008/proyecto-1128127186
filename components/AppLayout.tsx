@@ -1,122 +1,235 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import {
+  IconLogo,
+  IconDashboard,
+  IconCalendar,
+  IconEvents,
+  IconBell,
+  IconReports,
+  IconAdmin,
+  IconUser,
+  IconLogout,
+  IconMenu,
+  IconClose,
+  IconPlus,
+} from './icons';
 
 interface AppLayoutProps {
   children: ReactNode;
   userRole?: string;
+  userName?: string;
 }
 
-const navigationItems = [
-  { name: 'Inicio', href: '/dashboard', icon: '🏠' },
-  { name: 'Calendario', href: '/calendar', icon: '📅' },
-  { name: 'Eventos', href: '/events', icon: '📝' },
-  { name: 'Notificaciones', href: '/notifications', icon: '🔔' },
-  { name: 'Reportes', href: '/reports', icon: '📊' },
-  { name: 'Perfil', href: '/profile', icon: '👤' },
+type NavItem = {
+  name: string;
+  href: string;
+  Icon: (p: { size?: number; className?: string }) => React.ReactElement;
+};
+
+const primaryNav: NavItem[] = [
+  { name: 'Dashboard', href: '/dashboard', Icon: IconDashboard },
+  { name: 'Calendario', href: '/calendar', Icon: IconCalendar },
+  { name: 'Eventos', href: '/events', Icon: IconEvents },
 ];
 
-const adminItems = [
-  { name: 'Administración', href: '/admin', icon: '⚙️' },
+const secondaryNav: NavItem[] = [
+  { name: 'Notificaciones', href: '/notifications', Icon: IconBell },
+  { name: 'Reportes', href: '/reports', Icon: IconReports },
 ];
 
-export function AppLayout({ children, userRole }: AppLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+const adminNav: NavItem[] = [
+  { name: 'Admin · Usuarios', href: '/admin/users', Icon: IconUser },
+  { name: 'Admin · Reportes', href: '/admin/reports', Icon: IconReports },
+  { name: 'Admin · Config', href: '/admin/config', Icon: IconAdmin },
+  { name: 'Admin · BD', href: '/admin/db-setup', Icon: IconAdmin },
+];
+
+export function AppLayout({ children, userRole, userName }: AppLayoutProps) {
+  const [open, setOpen] = useState(false);
+  const [now, setNow] = useState<Date | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
 
-  const allItems = userRole === 'admin' ? [...navigationItems, ...adminItems] : navigationItems;
+  useEffect(() => {
+    setNow(new Date());
+    const id = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => setOpen(false), [pathname]);
+
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/dashboard' && pathname?.startsWith(href));
+
+  async function logout() {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+    router.push('/login');
+  }
+
+  const renderItem = (item: NavItem) => {
+    const active = isActive(item.href);
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={[
+          'group relative flex items-center gap-3 px-3 h-10 rounded text-[13px] tracking-tight transition-colors',
+          active
+            ? 'text-bone-0 bg-ink-2'
+            : 'text-bone-2 hover:text-bone-0 hover:bg-ink-2/70',
+        ].join(' ')}
+      >
+        <span
+          className={[
+            'absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-r transition-opacity',
+            active ? 'bg-lime opacity-100' : 'opacity-0',
+          ].join(' ')}
+        />
+        <item.Icon size={18} className={active ? 'text-lime' : ''} />
+        <span>{item.name}</span>
+      </Link>
+    );
+  };
+
+  const initial = (userName || 'Usuario').trim().charAt(0).toUpperCase();
+  const dateLabel = now
+    ? now.toLocaleDateString('es-CO', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'short',
+      })
+    : '';
+  const timeLabel = now
+    ? now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
+    : '';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
+    <div className="min-h-screen bg-ink-0 text-bone-0">
+      {/* Mobile backdrop */}
+      {open && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-ink-0/80 backdrop-blur-sm lg:hidden"
+          onClick={() => setOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-violet-500 to-pink-400 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">📅</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">AgendaPro</span>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
-            {allItems.map((item) => {
-              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-violet-50 text-violet-700 border-r-2 border-violet-500'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* User section */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600">U</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">Usuario</p>
-                <p className="text-xs text-gray-500 truncate">{userRole || 'user'}</p>
-              </div>
-            </div>
-          </div>
+      <aside
+        className={[
+          'fixed inset-y-0 left-0 z-50 w-72 bg-ink-1 border-r border-ink-3 flex flex-col',
+          'transform transition-transform duration-300 ease-out',
+          'lg:translate-x-0 lg:static lg:inset-auto',
+          open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+        ].join(' ')}
+      >
+        <div className="flex items-center justify-between h-16 px-5 border-b border-ink-3">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <span className="text-lime">
+              <IconLogo size={22} />
+            </span>
+            <span className="font-display text-[20px] tracking-editorial">
+              Agenda<span className="text-bone-2">·</span>Pro
+            </span>
+          </Link>
+          <button
+            onClick={() => setOpen(false)}
+            className="lg:hidden text-bone-2 hover:text-bone-0 transition-colors"
+            aria-label="Cerrar menú"
+          >
+            <IconClose size={20} />
+          </button>
         </div>
-      </div>
 
-      {/* Main content */}
-      <div className="lg:pl-64">
-        {/* Top bar */}
-        <div className="sticky top-0 z-40 bg-white border-b border-gray-200 lg:hidden">
-          <div className="flex items-center justify-between h-16 px-4">
+        <div className="px-5 pt-5 pb-3">
+          <p className="eyebrow mb-1">Hoy</p>
+          <p className="font-display text-[19px] capitalize tracking-editorial">
+            {dateLabel || '—'}
+          </p>
+          <p className="font-mono text-xs text-bone-2 mt-0.5">{timeLabel}</p>
+        </div>
+
+        <div className="px-3">
+          <Link
+            href="/events/new"
+            className="flex items-center justify-between gap-2 h-10 px-3 rounded bg-lime text-ink-0 hover:bg-bone-0 transition-colors font-medium text-sm"
+          >
+            <span className="flex items-center gap-2">
+              <IconPlus size={16} />
+              Nuevo evento
+            </span>
+            <span className="kbd">N</span>
+          </Link>
+        </div>
+
+        <nav className="flex-1 px-3 pt-5 pb-2 space-y-0.5 overflow-y-auto">
+          <p className="eyebrow px-3 mb-2">Espacio</p>
+          {primaryNav.map(renderItem)}
+
+          <p className="eyebrow px-3 mt-6 mb-2">Actividad</p>
+          {secondaryNav.map(renderItem)}
+
+          {userRole === 'admin' && (
+            <>
+              <p className="eyebrow px-3 mt-6 mb-2">Administración</p>
+              {adminNav.map(renderItem)}
+            </>
+          )}
+        </nav>
+
+        <div className="border-t border-ink-3 p-3">
+          <div className="flex items-center gap-3 px-2 py-2">
+            <div className="h-9 w-9 rounded-full bg-ink-3 border border-ink-4 flex items-center justify-center font-mono text-bone-0">
+              {initial}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-bone-0 truncate">{userName || 'Usuario'}</p>
+              <p className="font-mono text-[11px] uppercase tracking-ticker text-bone-2">
+                {userRole || 'user'}
+              </p>
+            </div>
             <button
-              onClick={() => setSidebarOpen(true)}
-              className="text-gray-500 hover:text-gray-600"
+              onClick={logout}
+              className="text-bone-2 hover:text-crimson transition-colors p-2 rounded hover:bg-ink-2"
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <IconLogout size={18} />
             </button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-violet-500 to-pink-400 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">📅</span>
-              </div>
-              <span className="text-lg font-bold text-gray-900">AgendaPro</span>
-            </div>
-            <div className="w-6" /> {/* Spacer */}
           </div>
         </div>
+      </aside>
 
-        {/* Page content */}
-        <main className="flex-1">
-          {children}
-        </main>
+      {/* Main */}
+      <div className="lg:pl-72">
+        {/* Mobile top bar */}
+        <header className="sticky top-0 z-30 bg-ink-0/90 backdrop-blur-md border-b border-ink-3 lg:hidden">
+          <div className="flex items-center justify-between h-14 px-4">
+            <button
+              onClick={() => setOpen(true)}
+              className="text-bone-1 hover:text-bone-0 transition-colors"
+              aria-label="Abrir menú"
+            >
+              <IconMenu size={22} />
+            </button>
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <span className="text-lime">
+                <IconLogo size={18} />
+              </span>
+              <span className="font-display text-base">
+                Agenda<span className="text-bone-2">·</span>Pro
+              </span>
+            </Link>
+            <span className="w-6" />
+          </div>
+        </header>
+
+        <main className="min-h-screen">{children}</main>
       </div>
     </div>
   );

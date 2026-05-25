@@ -1,283 +1,381 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { AppLayout } from '@/components/AppLayout';
+import { Badge } from '@/components/Badge';
 import { EventWithDetails } from '@/lib/types';
+import {
+  IconChevronLeft,
+  IconEdit,
+  IconTrash,
+  IconCheck,
+  IconClock,
+  IconLocation,
+  IconPaperclip,
+  IconBell,
+  IconTag,
+  IconFlag,
+} from '@/components/icons';
+
+const CATEGORY_LABEL: Record<string, string> = {
+  personal: 'Personal',
+  trabajo: 'Trabajo',
+  salud: 'Salud',
+  educacion: 'Educación',
+  otro: 'Otro',
+};
+const CATEGORY_DOT: Record<string, string> = {
+  personal: 'bg-cat-personal',
+  trabajo: 'bg-cat-trabajo',
+  salud: 'bg-cat-salud',
+  educacion: 'bg-cat-educacion',
+  otro: 'bg-cat-otro',
+};
+const STATUS_VARIANT: Record<string, 'default' | 'success' | 'warning' | 'error'> = {
+  pendiente: 'warning',
+  completado: 'success',
+  cancelado: 'error',
+};
+const PRIORITY_VARIANT: Record<string, 'default' | 'warning' | 'error'> = {
+  normal: 'default',
+  alta: 'warning',
+  urgente: 'error',
+};
+
+interface SessionUser {
+  name: string;
+  role: string;
+}
 
 export default function EventDetailPage() {
   const router = useRouter();
-  const params = useParams();
-  const eventId = params.id as string;
+  const params = useParams<{ id: string }>();
+  const eventId = params.id;
 
   const [event, setEvent] = useState<EventWithDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCompleting, setIsCompleting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [acting, setActing] = useState<'complete' | 'delete' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.user && setUser(d.user))
+      .catch(() => {});
+  }, []);
+
+  const fetchEvent = useCallback(async () => {
+    setError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setEvent(data);
+      } else if (res.status === 404) {
+        setError('Evento no encontrado');
+      } else {
+        setError('No se pudo cargar el evento');
+      }
+    } catch {
+      setError('No se pudo cargar el evento');
+    } finally {
+      setLoading(false);
+    }
+  }, [eventId]);
 
   useEffect(() => {
     fetchEvent();
-  }, [eventId]);
+  }, [fetchEvent]);
 
-  const fetchEvent = async () => {
+  async function complete() {
+    if (!confirm('Marcar este evento como completado?')) return;
+    setActing('complete');
     try {
-      const response = await fetch(`/api/events/${eventId}`);
-      if (response.ok) {
-        const eventData = await response.json();
-        setEvent(eventData);
-      } else if (response.status === 404) {
-        setError('Evento no encontrado');
+      const res = await fetch(`/api/events/${eventId}/complete`, { method: 'POST' });
+      if (res.ok) {
+        await fetchEvent();
       } else {
-        setError('Error al cargar el evento');
+        const e = await res.json();
+        setError(e.error || 'Error al completar');
       }
-    } catch (err) {
-      setError('Error al cargar el evento');
     } finally {
-      setIsLoading(false);
+      setActing(null);
     }
-  };
+  }
 
-  const handleComplete = async () => {
-    if (!confirm('¿Estás seguro de que quieres marcar este evento como completado?')) {
-      return;
-    }
-
-    setIsCompleting(true);
+  async function remove() {
+    if (!confirm('¿Eliminar este evento? Esta acción no se puede deshacer.')) return;
+    setActing('delete');
     try {
-      const response = await fetch(`/api/events/${eventId}/complete`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        await fetchEvent(); // Recargar el evento
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Error al completar el evento');
-      }
-    } catch (err) {
-      setError('Error al completar el evento');
-    } finally {
-      setIsCompleting(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este evento? Esta acción no se puede deshacer.')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/events/${eventId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
+      const res = await fetch(`/api/events/${eventId}`, { method: 'DELETE' });
+      if (res.ok) {
         router.push('/events');
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Error al eliminar el evento');
+        const e = await res.json();
+        setError(e.error || 'Error al eliminar');
       }
-    } catch (err) {
-      setError('Error al eliminar el evento');
+    } finally {
+      setActing(null);
     }
-  };
+  }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('es-ES', {
-      year: 'numeric',
+  if (loading) {
+    return (
+      <AppLayout userRole={user?.role} userName={user?.name}>
+        <div className="px-6 lg:px-12 py-10 max-w-4xl mx-auto">
+          <p className="text-bone-2 font-mono text-sm">
+            <span className="ap-pulse-dot">cargando evento…</span>
+          </p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <AppLayout userRole={user?.role} userName={user?.name}>
+        <div className="px-6 lg:px-12 py-10 max-w-2xl mx-auto">
+          <p className="font-mono text-[11px] uppercase tracking-ticker text-crimson mb-2">
+            error
+          </p>
+          <h1 className="font-display text-3xl tracking-editorial mb-4">
+            {error || 'Evento no disponible'}
+          </h1>
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-2 text-bone-2 hover:text-bone-0 transition-colors"
+          >
+            <IconChevronLeft size={16} /> Volver a la lista
+          </Link>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const start = new Date(event.startAt);
+  const end = event.endAt ? new Date(event.endAt) : null;
+
+  const fmtDate = (d: Date) =>
+    d.toLocaleDateString('es-CO', {
+      weekday: 'long',
+      day: '2-digit',
       month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      year: 'numeric',
     });
-  };
-
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      personal: 'bg-blue-100 text-blue-800',
-      trabajo: 'bg-green-100 text-green-800',
-      salud: 'bg-red-100 text-red-800',
-      educacion: 'bg-purple-100 text-purple-800',
-      otro: 'bg-gray-100 text-gray-800',
-    };
-    return colors[category as keyof typeof colors] || colors.otro;
-  };
-
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      normal: 'text-gray-600',
-      alta: 'text-orange-600',
-      urgente: 'text-red-600',
-    };
-    return colors[priority as keyof typeof colors] || colors.normal;
-  };
-
-  const getStatusColor = (status: string) => {
-    const colors = {
-      pendiente: 'bg-yellow-100 text-yellow-800',
-      completado: 'bg-green-100 text-green-800',
-      cancelado: 'bg-red-100 text-red-800',
-    };
-    return colors[status as keyof typeof colors] || colors.pendiente;
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-600">{error}</p>
-        <button
-          onClick={() => router.push('/events')}
-          className="mt-4 text-violet-600 hover:text-violet-700"
-        >
-          Volver a la lista de eventos
-        </button>
-      </div>
-    );
-  }
-
-  if (!event) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Evento no encontrado</p>
-        <button
-          onClick={() => router.push('/events')}
-          className="mt-4 text-violet-600 hover:text-violet-700"
-        >
-          Volver a la lista de eventos
-        </button>
-      </div>
-    );
-  }
+  const fmtTime = (d: Date) =>
+    d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{event.title}</h1>
-          <div className="flex items-center gap-3 mt-2">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(event.category)}`}>
-              {event.category}
-            </span>
-            <span className={`text-sm font-medium ${getPriorityColor(event.priority)}`}>
-              Prioridad: {event.priority}
-            </span>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
-              {event.status}
-            </span>
-          </div>
-        </div>
+    <AppLayout userRole={user?.role} userName={user?.name}>
+      <div className="px-6 lg:px-12 py-10 max-w-5xl mx-auto">
+        <Link
+          href="/events"
+          className="inline-flex items-center gap-1.5 text-bone-3 hover:text-bone-0 transition-colors text-sm mb-8 font-mono uppercase tracking-ticker text-[11px]"
+        >
+          <IconChevronLeft size={14} /> Eventos
+        </Link>
 
-        <div className="flex gap-2">
+        {/* Hero */}
+        <header className="ap-fade-up mb-12">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span
+              className={`h-2 w-2 rounded-full ${CATEGORY_DOT[event.category] || CATEGORY_DOT.otro}`}
+            />
+            <span className="font-mono text-[11px] uppercase tracking-ticker text-bone-2">
+              {CATEGORY_LABEL[event.category] || 'Otro'}
+            </span>
+            <span className="text-bone-3">·</span>
+            <Badge variant={STATUS_VARIANT[event.status] || 'default'} dot>
+              {event.status}
+            </Badge>
+            {event.priority && event.priority !== 'normal' && (
+              <Badge variant={PRIORITY_VARIANT[event.priority]} dot>
+                {event.priority}
+              </Badge>
+            )}
+          </div>
+
+          <h1 className="font-display tracking-editorial text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.95] mb-6">
+            {event.title}
+          </h1>
+
+          <p className="font-mono text-bone-2 text-sm">
+            <span className="text-bone-0">{fmtDate(start)}</span>
+            <br />
+            <span>
+              {fmtTime(start)}
+              {end ? `–${fmtTime(end)}` : ''}
+            </span>
+          </p>
+        </header>
+
+        {/* Actions */}
+        <div className="flex flex-wrap gap-2 mb-12">
           <Link
             href={`/events/${event.id}/edit`}
-            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded border border-ink-3 text-bone-1 hover:text-bone-0 hover:border-ink-4 hover:bg-ink-2 transition-colors text-sm"
           >
-            Editar
+            <IconEdit size={16} /> Editar
           </Link>
           {event.status === 'pendiente' && (
             <button
-              onClick={handleComplete}
-              disabled={isCompleting}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              onClick={complete}
+              disabled={!!acting}
+              className="inline-flex items-center gap-2 h-10 px-4 rounded bg-lime text-ink-0 hover:bg-bone-0 transition-colors text-sm font-medium disabled:opacity-40"
             >
-              {isCompleting ? 'Completando...' : 'Marcar como completado'}
+              <IconCheck size={16} />
+              {acting === 'complete' ? 'Completando…' : 'Marcar completado'}
             </button>
           )}
           <button
-            onClick={handleDelete}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            onClick={remove}
+            disabled={!!acting}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded border border-crimson/40 text-crimson hover:bg-crimson hover:text-ink-0 transition-colors text-sm disabled:opacity-40"
           >
-            Eliminar
+            <IconTrash size={16} />
+            {acting === 'delete' ? 'Eliminando…' : 'Eliminar'}
           </button>
         </div>
-      </div>
 
-      {/* Detalles */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Detalles del Evento</h2>
+        {/* Detail grid */}
+        <div className="grid lg:grid-cols-[1fr_280px] gap-10">
+          <section className="space-y-10">
+            <DetailBlock label="Ubicación" icon={<IconLocation size={14} />}>
+              {event.location ? (
+                <p className="text-bone-0 text-lg">{event.location}</p>
+              ) : (
+                <p className="text-bone-3 italic">Sin ubicación asignada</p>
+              )}
+            </DetailBlock>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">Fecha y hora de inicio</h3>
-            <p className="text-gray-900">{formatDate(event.startAt)}</p>
-          </div>
+            <DetailBlock label="Descripción">
+              {event.description ? (
+                <p className="text-bone-1 text-[15px] leading-relaxed whitespace-pre-wrap">
+                  {event.description}
+                </p>
+              ) : (
+                <p className="text-bone-3 italic">Sin descripción</p>
+              )}
+            </DetailBlock>
 
-          {event.endAt && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Fecha y hora de fin</h3>
-              <p className="text-gray-900">{formatDate(event.endAt)}</p>
+            <DetailBlock label="Adjuntos" icon={<IconPaperclip size={14} />}>
+              {!event.attachments || event.attachments.length === 0 ? (
+                <p className="text-bone-3 italic">No hay archivos adjuntos.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {event.attachments.map((a) => (
+                    <li
+                      key={a.id}
+                      className="flex items-center justify-between gap-3 p-3 rounded border border-ink-3 bg-ink-1 hover:bg-ink-2 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-bone-3">
+                          <IconPaperclip size={18} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-sm text-bone-0 truncate">{a.filename}</p>
+                          <p className="font-mono text-[11px] text-bone-3">
+                            {(a.fileSize / 1024).toFixed(1)} KB · {a.contentType}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `/api/events/${event.id}/attachments?attachmentId=${a.id}`,
+                            '_blank'
+                          )
+                        }
+                        className="font-mono text-[11px] uppercase tracking-ticker text-lime hover:text-bone-0"
+                      >
+                        descargar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DetailBlock>
+
+            <DetailBlock label="Recordatorios" icon={<IconBell size={14} />}>
+              <p className="text-bone-3 italic">
+                Configuración de recordatorios en la próxima iteración (fase 5).
+              </p>
+            </DetailBlock>
+          </section>
+
+          <aside className="space-y-6 lg:sticky lg:top-6 self-start">
+            <div className="bg-ink-1 border border-ink-3 rounded-lg p-5">
+              <p className="eyebrow mb-4">Metadatos</p>
+              <dl className="space-y-3 text-sm">
+                <Meta label="Categoría" icon={<IconTag size={12} />}>
+                  {CATEGORY_LABEL[event.category]}
+                </Meta>
+                <Meta label="Prioridad" icon={<IconFlag size={12} />}>
+                  {event.priority}
+                </Meta>
+                <Meta label="Estado">
+                  {event.status}
+                </Meta>
+                <Meta label="Inicio" icon={<IconClock size={12} />}>
+                  <span className="font-mono">
+                    {start.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
+                  </span>
+                </Meta>
+                {end && (
+                  <Meta label="Fin" icon={<IconClock size={12} />}>
+                    <span className="font-mono">
+                      {end.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
+                    </span>
+                  </Meta>
+                )}
+              </dl>
             </div>
-          )}
-
-          {event.location && (
-            <div className="md:col-span-2">
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Ubicación</h3>
-              <p className="text-gray-900">{event.location}</p>
-            </div>
-          )}
-
-          {event.description && (
-            <div className="md:col-span-2">
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Descripción</h3>
-              <p className="text-gray-900 whitespace-pre-wrap">{event.description}</p>
-            </div>
-          )}
+          </aside>
         </div>
       </div>
+    </AppLayout>
+  );
+}
 
-      {/* Adjuntos */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Adjuntos</h2>
+function DetailBlock({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <header className="flex items-center gap-1.5 mb-3 text-bone-3">
+        {icon}
+        <p className="font-mono text-[11px] uppercase tracking-ticker">{label}</p>
+      </header>
+      <div>{children}</div>
+    </section>
+  );
+}
 
-        {event.attachments.length === 0 ? (
-          <p className="text-gray-500">No hay adjuntos para este evento</p>
-        ) : (
-          <div className="space-y-3">
-            {event.attachments.map((attachment) => (
-              <div key={attachment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{attachment.filename}</p>
-                    <p className="text-xs text-gray-500">
-                      {(attachment.fileSize / 1024).toFixed(1)} KB • {attachment.contentType}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => window.open(`/api/events/${event.id}/attachments?attachmentId=${attachment.id}`, '_blank')}
-                  className="text-violet-600 hover:text-violet-700 text-sm font-medium"
-                >
-                  Descargar
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Recordatorios (placeholder para Fase 5) */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Recordatorios</h2>
-        <p className="text-gray-500">Los recordatorios se implementarán en la Fase 5</p>
-      </div>
-
-      {/* Historial de notificaciones (placeholder para Fase 5) */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Historial de Notificaciones</h2>
-        <p className="text-gray-500">El historial de notificaciones se implementará en la Fase 5</p>
-      </div>
+function Meta({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="flex items-center gap-1.5 text-bone-3 font-mono text-[11px] uppercase tracking-ticker">
+        {icon}
+        {label}
+      </dt>
+      <dd className="text-bone-0 text-sm capitalize">{children}</dd>
     </div>
   );
 }

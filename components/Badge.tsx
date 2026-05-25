@@ -1,24 +1,42 @@
 import { ReactNode } from 'react';
 
+type Variant = 'default' | 'success' | 'warning' | 'error' | 'info' | 'lime';
+
 interface BadgeProps {
   children: ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'error' | 'info';
+  variant?: Variant;
   className?: string;
+  dot?: boolean;
 }
 
-export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
-  const baseClasses = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+export function Badge({ children, variant = 'default', className = '', dot = false }: BadgeProps) {
+  const variants: Record<Variant, string> = {
+    default: 'border-ink-3 bg-ink-2 text-bone-1',
+    success: 'border-lime/30 bg-lime-soft text-lime',
+    warning: 'border-amber/40 bg-amber-soft text-amber',
+    error: 'border-crimson/40 bg-crimson-soft text-crimson',
+    info: 'border-sky/30 bg-ink-2 text-sky',
+    lime: 'border-lime bg-lime text-ink-0',
+  };
 
-  const variantClasses = {
-    default: 'bg-gray-100 text-gray-800',
-    success: 'bg-green-100 text-green-800',
-    warning: 'bg-yellow-100 text-yellow-800',
-    error: 'bg-red-100 text-red-800',
-    info: 'bg-blue-100 text-blue-800',
+  const dotColor: Record<Variant, string> = {
+    default: 'bg-bone-2',
+    success: 'bg-lime',
+    warning: 'bg-amber',
+    error: 'bg-crimson',
+    info: 'bg-sky',
+    lime: 'bg-ink-0',
   };
 
   return (
-    <span className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
+    <span
+      className={[
+        'inline-flex items-center gap-1.5 px-2 h-6 text-[11px] font-mono uppercase tracking-ticker border rounded-sm',
+        variants[variant],
+        className,
+      ].join(' ')}
+    >
+      {dot && <span className={`h-1.5 w-1.5 rounded-full ${dotColor[variant]}`} />}
       {children}
     </span>
   );

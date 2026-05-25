@@ -1,209 +1,416 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { AppLayout } from '@/components/AppLayout';
 import { SeedModeBanner } from '@/components/SeedModeBanner';
 import { QuotaAlert } from '@/components/QuotaAlert';
-import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
+import { Badge } from '@/components/Badge';
 import { useGlobalErrorHandler } from '@/lib/useGlobalErrorHandler';
+import {
+  IconArrowRight,
+  IconCalendar,
+  IconBell,
+  IconReports,
+  IconPlus,
+  IconLocation,
+  IconSparkle,
+} from '@/components/icons';
+
+interface EventItem {
+  id: string;
+  title: string;
+  startAt: string;
+  endAt?: string | null;
+  location?: string | null;
+  category?: string;
+  priority?: 'normal' | 'alta' | 'urgente';
+  status?: string;
+}
 
 interface DashboardData {
   mode: 'seed' | 'live';
-  upcomingEvents: any[];
-  todayReminders: any[];
+  upcomingEvents: EventItem[];
+  todayReminders: unknown[];
   quotaAlert: boolean;
   activeEventCount?: number;
   maxEvents?: number;
 }
 
+interface SessionUser {
+  name: string;
+  email: string;
+  role: string;
+}
+
+const CATEGORY_LABEL: Record<string, string> = {
+  personal: 'Personal',
+  trabajo: 'Trabajo',
+  salud: 'Salud',
+  educacion: 'Educación',
+  otro: 'Otro',
+};
+
+const CATEGORY_DOT: Record<string, string> = {
+  personal: 'bg-cat-personal',
+  trabajo: 'bg-cat-trabajo',
+  salud: 'bg-cat-salud',
+  educacion: 'bg-cat-educacion',
+  otro: 'bg-cat-otro',
+};
+
+const PRIORITY_VARIANT: Record<string, 'default' | 'warning' | 'error'> = {
+  normal: 'default',
+  alta: 'warning',
+  urgente: 'error',
+};
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { handleResponse } = useGlobalErrorHandler();
-  const [quotaModalOpen, setQuotaModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchDashboardData();
-
-    const handleShowQuotaModal = () => setQuotaModalOpen(true);
-    window.addEventListener('showQuotaModal', handleShowQuotaModal);
-    return () => window.removeEventListener('showQuotaModal', handleShowQuotaModal);
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      const response = await handleResponse(await fetch('/api/dashboard'));
-      const dashboardData = await response.json();
-      setData(dashboardData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBootstrap = async () => {
-    // TODO: Implementar bootstrap
-    console.log('Bootstrap clicked');
-  };
+    (async () => {
+      try {
+        const [dashRes, meRes] = await Promise.all([
+          handleResponse(await fetch('/api/dashboard')),
+          fetch('/api/auth/me').catch(() => null),
+        ]);
+        const dashboard: DashboardData = await dashRes.json();
+        setData(dashboard);
+        if (meRes && meRes.ok) {
+          const me = await meRes.json();
+          setUser(me.user || me);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error desconocido');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [handleResponse]);
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Cargando dashboard...</p>
-          </div>
+        <div className="min-h-[60vh] flex items-center justify-center text-bone-2 font-mono text-sm">
+          <span className="ap-pulse-dot">cargando…</span>
         </div>
       </AppLayout>
     );
   }
 
-  if (error) {
+  if (error || !data) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-              <h3 className="text-lg font-medium text-red-800 mb-2">Error</h3>
-              <p className="text-red-600">{error}</p>
-              <Button onClick={fetchDashboardData} className="mt-4">
-                Reintentar
-              </Button>
-            </div>
+        <div className="p-10 max-w-xl">
+          <div className="bg-crimson-soft border border-crimson/30 rounded p-5 text-bone-1">
+            <p className="font-mono text-xs uppercase tracking-ticker text-crimson mb-2">
+              error
+            </p>
+            <p>{error || 'No se pudo cargar el dashboard'}</p>
           </div>
         </div>
       </AppLayout>
     );
   }
 
+  const now = new Date();
+  const greetingHour = now.getHours();
+  const greeting =
+    greetingHour < 6
+      ? 'Buenas madrugadas'
+      : greetingHour < 12
+      ? 'Buenos días'
+      : greetingHour < 19
+      ? 'Buenas tardes'
+      : 'Buenas noches';
+
   return (
-    <AppLayout userRole="user">
-      <div className="p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-            <p className="text-gray-600">Bienvenido a AgendaPro. Gestiona tus eventos y recordatorios.</p>
-          </div>
+    <AppLayout userRole={user?.role} userName={user?.name}>
+      <div className="px-6 lg:px-12 py-8 lg:py-12 max-w-[1280px] mx-auto">
+        {data.mode === 'seed' && <SeedModeBanner />}
+        {data.quotaAlert && data.activeEventCount != null && data.maxEvents && (
+          <QuotaAlert
+            activeEventCount={data.activeEventCount}
+            maxEvents={data.maxEvents}
+          />
+        )}
 
-          {data?.mode === 'seed' && (
-            <SeedModeBanner onBootstrap={handleBootstrap} />
-          )}
+        {/* Hero editorial */}
+        <header className="ap-fade-up mb-10 lg:mb-14">
+          <p className="eyebrow mb-3">
+            Dashboard ·{' '}
+            {now.toLocaleDateString('es-CO', {
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </p>
+          <h1 className="font-display tracking-editorial text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.95] mb-4">
+            {greeting},
+            <br />
+            <span className="italic text-bone-2">
+              {user?.name?.split(' ')[0] || 'Usuario'}
+            </span>
+            <span className="text-lime">.</span>
+          </h1>
+          <p className="text-bone-1 text-lg max-w-2xl leading-relaxed">
+            Tienes{' '}
+            <span className="text-bone-0 font-mono">
+              {data.upcomingEvents.length}
+            </span>{' '}
+            evento{data.upcomingEvents.length === 1 ? '' : 's'} en los próximos
+            7 días y{' '}
+            <span className="text-bone-0 font-mono">
+              {data.activeEventCount ?? 0}
+            </span>{' '}
+            activo{data.activeEventCount === 1 ? '' : 's'} en total.
+          </p>
+        </header>
 
-          {data?.quotaAlert && data.activeEventCount && data.maxEvents && (
-            <QuotaAlert activeEventCount={data.activeEventCount} maxEvents={data.maxEvents} />
-          )}
+        {/* Stat strip */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-ink-3 border border-ink-3 rounded-lg overflow-hidden mb-12">
+          <StatTile
+            label="Próximos 7 días"
+            value={data.upcomingEvents.length}
+            Icon={IconCalendar}
+          />
+          <StatTile
+            label="Activos"
+            value={data.activeEventCount ?? 0}
+            suffix={`/${data.maxEvents ?? 500}`}
+            Icon={IconSparkle}
+          />
+          <StatTile
+            label="Recordatorios hoy"
+            value={data.todayReminders.length}
+            Icon={IconBell}
+          />
+          <StatTile
+            label="Cuota usada"
+            value={`${Math.round(((data.activeEventCount ?? 0) / (data.maxEvents ?? 500)) * 100)}%`}
+            Icon={IconReports}
+          />
+        </section>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Próximos eventos */}
-            <Card>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Próximos eventos</h2>
-                <Button size="sm">Crear evento</Button>
+        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-8">
+          {/* Próximos eventos */}
+          <section className="bg-ink-1 border border-ink-3 rounded-lg overflow-hidden">
+            <header className="flex items-center justify-between p-6 border-b border-ink-3">
+              <div>
+                <p className="eyebrow mb-1">Agenda</p>
+                <h2 className="font-display text-2xl tracking-editorial">
+                  Próximos eventos
+                </h2>
               </div>
-              {data?.upcomingEvents.length === 0 ? (
+              <Link
+                href="/events/new"
+                className="inline-flex items-center gap-2 h-9 px-3 rounded bg-ink-2 border border-ink-3 hover:border-bone-2 text-sm transition-colors"
+              >
+                <IconPlus size={16} /> Nuevo
+              </Link>
+            </header>
+
+            {data.upcomingEvents.length === 0 ? (
+              <div className="p-6">
                 <EmptyState
-                  icon={<span className="text-4xl">📅</span>}
+                  icon={<IconCalendar size={40} />}
                   title="Tu agenda está despejada"
-                  description="¿Qué tienes planeado?"
-                  action={<Button>+ Nuevo Evento</Button>}
+                  description="No tienes eventos en los próximos 7 días. Es buen momento para planear algo."
+                  action={
+                    <Link
+                      href="/events/new"
+                      className="inline-flex items-center gap-2 h-10 px-4 rounded bg-lime text-ink-0 text-sm font-medium hover:bg-bone-0 transition-colors"
+                    >
+                      <IconPlus size={16} /> Crear primer evento
+                    </Link>
+                  }
                 />
-              ) : (
-                <div className="space-y-3">
-                  {/* TODO: Renderizar eventos */}
-                  <p className="text-gray-500">Próximamente: lista de eventos</p>
-                </div>
-              )}
-            </Card>
+              </div>
+            ) : (
+              <ul className="divide-y divide-ink-3">
+                {data.upcomingEvents.map((e, i) => (
+                  <EventRow key={e.id} event={e} index={i} />
+                ))}
+              </ul>
+            )}
+          </section>
 
-            {/* Recordatorios de hoy */}
-            <Card>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Recordatorios de hoy</h2>
-              {data?.todayReminders.length === 0 ? (
-                <EmptyState
-                  icon={<span className="text-4xl">🔔</span>}
-                  title="No hay recordatorios para hoy"
-                  description="Tus recordatorios aparecerán aquí cuando llegue el momento."
+          {/* Sidebar derecho */}
+          <aside className="space-y-8">
+            <section className="bg-ink-1 border border-ink-3 rounded-lg p-6">
+              <p className="eyebrow mb-2">Atajos</p>
+              <h3 className="font-display text-xl tracking-editorial mb-5">
+                Movimientos rápidos
+              </h3>
+              <div className="space-y-2">
+                <QuickAction
+                  href="/calendar"
+                  Icon={IconCalendar}
+                  label="Ver calendario mensual"
                 />
-              ) : (
-                <div className="space-y-3">
-                  {/* TODO: Renderizar recordatorios */}
-                  <p className="text-gray-500">Próximamente: lista de recordatorios</p>
-                </div>
-              )}
-            </Card>
-          </div>
+                <QuickAction
+                  href="/events/new"
+                  Icon={IconPlus}
+                  label="Nuevo evento"
+                />
+                <QuickAction
+                  href="/notifications"
+                  Icon={IconBell}
+                  label="Historial de notificaciones"
+                />
+                <QuickAction
+                  href="/reports"
+                  Icon={IconReports}
+                  label="Reporte personal"
+                />
+              </div>
+            </section>
 
-          {/* Acceso rápido */}
-          <Card>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Acceso rápido</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                <span className="text-2xl">📅</span>
-                <span className="text-sm">Ver calendario</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                <span className="text-2xl">📝</span>
-                <span className="text-sm">Crear evento</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                <span className="text-2xl">🔔</span>
-                <span className="text-2xl">Ver notificaciones</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                <span className="text-2xl">📊</span>
-                <span className="text-sm">Ver reportes</span>
-              </Button>
-            </div>
-          </Card>
+            <section className="bg-ink-1 border border-ink-3 rounded-lg p-6">
+              <p className="eyebrow mb-2">Motor</p>
+              <h3 className="font-display text-xl tracking-editorial mb-3">
+                Recordatorios automáticos
+              </h3>
+              <p className="text-bone-2 text-sm leading-relaxed mb-4">
+                El sistema evalúa los recordatorios cada 5 minutos y envía
+                correos dentro de tu ventana 06:00–22:00.
+              </p>
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2 text-bone-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-lime ap-pulse-dot" />
+                  Operativo
+                </span>
+                <span className="font-mono text-xs text-bone-3">cron · */5</span>
+              </div>
+            </section>
+          </aside>
         </div>
       </div>
-      <QuotaModal isOpen={quotaModalOpen} onClose={() => setQuotaModalOpen(false)} />
     </AppLayout>
   );
 }
 
-function QuotaModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function StatTile({
+  label,
+  value,
+  suffix,
+  Icon,
+}: {
+  label: string;
+  value: number | string;
+  suffix?: string;
+  Icon: (p: { size?: number; className?: string }) => React.ReactElement;
+}) {
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 ${isOpen ? '' : 'hidden'}`}>
-      <div className="w-full max-w-md bg-white rounded-lg shadow-xl">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Límite de eventos alcanzado</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            <p className="text-gray-700">
-              Has alcanzado el límite de 500 eventos activos. Archiva o elimina eventos para continuar.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cerrar
-              </button>
-              <a
-                href="/events?status=completado"
-                className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
-              >
-                Gestionar eventos completados
-              </a>
-            </div>
-          </div>
-        </div>
+    <div className="bg-ink-1 p-5 lg:p-6">
+      <div className="flex items-start justify-between mb-3">
+        <p className="eyebrow">{label}</p>
+        <span className="text-bone-3">
+          <Icon size={18} />
+        </span>
       </div>
+      <p className="font-display text-3xl lg:text-4xl tracking-editorial text-bone-0">
+        {value}
+        {suffix && <span className="font-mono text-base text-bone-3">{suffix}</span>}
+      </p>
     </div>
+  );
+}
+
+function EventRow({ event, index }: { event: EventItem; index: number }) {
+  const start = new Date(event.startAt);
+  const isToday = start.toDateString() === new Date().toDateString();
+  const dateLabel = isToday
+    ? 'Hoy'
+    : start.toLocaleDateString('es-CO', { weekday: 'short', day: '2-digit', month: 'short' });
+  const timeLabel = start.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+
+  return (
+    <li
+      className="ap-fade-up"
+      style={{ animationDelay: `${Math.min(index, 6) * 60}ms` }}
+    >
+      <Link
+        href={`/events/${event.id}`}
+        className="group flex items-center gap-5 p-5 hover:bg-ink-2 transition-colors"
+      >
+        <div className="text-right shrink-0 w-20">
+          <p className="font-mono text-[11px] uppercase tracking-ticker text-bone-2">
+            {dateLabel}
+          </p>
+          <p className="font-display text-2xl text-bone-0 tracking-editorial leading-none mt-1">
+            {timeLabel}
+          </p>
+        </div>
+
+        <div className="h-12 w-px bg-ink-3 shrink-0" />
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            {event.category && (
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${CATEGORY_DOT[event.category] || CATEGORY_DOT.otro}`}
+              />
+            )}
+            <p className="text-[11px] font-mono uppercase tracking-ticker text-bone-2">
+              {CATEGORY_LABEL[event.category || 'otro'] || 'Otro'}
+            </p>
+          </div>
+          <h3 className="font-display text-xl text-bone-0 tracking-editorial truncate">
+            {event.title}
+          </h3>
+          {event.location && (
+            <p className="flex items-center gap-1.5 text-sm text-bone-2 mt-1.5">
+              <IconLocation size={14} /> {event.location}
+            </p>
+          )}
+        </div>
+
+        <div className="hidden sm:flex flex-col items-end gap-2 shrink-0">
+          {event.priority && event.priority !== 'normal' && (
+            <Badge variant={PRIORITY_VARIANT[event.priority]} dot>
+              {event.priority}
+            </Badge>
+          )}
+          <span className="text-bone-3 group-hover:text-lime transition-colors">
+            <IconArrowRight size={18} />
+          </span>
+        </div>
+      </Link>
+    </li>
+  );
+}
+
+function QuickAction({
+  href,
+  Icon,
+  label,
+}: {
+  href: string;
+  Icon: (p: { size?: number; className?: string }) => React.ReactElement;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center justify-between gap-3 p-3 rounded border border-ink-3 bg-ink-1 hover:bg-ink-2 hover:border-ink-4 transition-colors"
+    >
+      <span className="flex items-center gap-3 text-sm text-bone-1 group-hover:text-bone-0">
+        <span className="text-bone-2 group-hover:text-lime transition-colors">
+          <Icon size={18} />
+        </span>
+        {label}
+      </span>
+      <IconArrowRight
+        size={16}
+        className="text-bone-3 group-hover:text-bone-0 transition-colors"
+      />
+    </Link>
   );
 }

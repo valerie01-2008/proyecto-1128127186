@@ -4,30 +4,41 @@ interface SeedModeBannerProps {
 
 export function SeedModeBanner({ onBootstrap }: SeedModeBannerProps) {
   return (
-    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="ml-3">
-            <p className="text-sm text-yellow-800">
-              <strong>Modo Seed:</strong> El sistema está ejecutándose con datos de prueba locales.
-              {onBootstrap && ' Configure la base de datos para activar todas las funcionalidades.'}
+    <div className="relative overflow-hidden rounded-lg border border-amber/30 bg-amber-soft mb-6">
+      <div className="absolute inset-y-0 left-0 w-1 bg-amber" />
+      <div className="flex items-center justify-between gap-4 p-4 pl-6">
+        <div className="flex items-center gap-3">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="text-amber"
+            aria-hidden="true"
+          >
+            <path d="M12 3 L21 19 H3 Z" strokeLinejoin="round" />
+            <path d="M12 10 V14" strokeLinecap="round" />
+            <circle cx="12" cy="17" r="0.8" fill="currentColor" />
+          </svg>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-ticker text-amber mb-1">
+              modo seed
+            </p>
+            <p className="text-sm text-bone-1">
+              El sistema corre con datos locales de demostración.
+              {onBootstrap && ' Configura la base para activar todas las funcionalidades.'}
             </p>
           </div>
         </div>
         {onBootstrap && (
-          <div className="ml-4">
-            <button
-              onClick={onBootstrap}
-              className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded-md text-sm font-medium transition-colors"
-            >
-              Configurar DB
-            </button>
-          </div>
+          <button
+            onClick={onBootstrap}
+            className="shrink-0 h-9 px-4 text-sm font-medium rounded border border-amber/40 text-amber hover:bg-amber hover:text-ink-0 transition-colors"
+          >
+            Configurar BD
+          </button>
         )}
       </div>
     </div>

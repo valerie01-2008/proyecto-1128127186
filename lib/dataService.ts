@@ -47,9 +47,21 @@ export function readAppConfig(): AppConfig {
  * Obtiene el modo del sistema (seed o live)
  */
 export async function getSystemMode(): Promise<'seed' | 'live'> {
-  // TODO: Implementar lógica real para determinar el modo
-  // Por ahora, siempre retorna 'seed'
-  return 'seed';
+  // 'live' cuando Supabase está configurado Y las migrations principales están aplicadas.
+  if (!process.env.POSTGRES_URL && !process.env.POSTGRES_PRISMA_URL) {
+    return 'seed';
+  }
+  try {
+    const result = await sql<{ count: string }[]>`
+      SELECT COUNT(*)::text AS count
+        FROM information_schema.tables
+       WHERE table_schema = 'public'
+         AND table_name IN ('users', 'events', 'reminders')
+    `;
+    return Number(result[0]?.count ?? 0) >= 3 ? 'live' : 'seed';
+  } catch {
+    return 'seed';
+  }
 }
 
 /**
