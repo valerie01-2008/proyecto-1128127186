@@ -32,10 +32,10 @@ export type AppConfigZod = z.infer<typeof AppConfigSchema>;
 // Shape base (sin refines de cross-field) para poder reusar en Update con .partial()
 const EventRequestShape = z.object({
   title: z.string().min(1).max(200),
-  startAt: z.string().refine((val) => {
-    const date = new Date(val);
-    return date > new Date(); // RN-02: fecha futura
-  }, 'La fecha debe ser futura'),
+  startAt: z.string().refine(
+    (val) => !Number.isNaN(new Date(val).getTime()),
+    'Fecha de inicio inválida'
+  ),
   endAt: z.string().nullish(),
   location: z.string().max(300).nullish(),
   description: z.string().nullish(),
