@@ -55,12 +55,12 @@ export default function LoginPage() {
       <div
         aria-hidden
         className="absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full blur-3xl"
-        style={{ background: 'radial-gradient(circle, rgba(200,255,58,0.18), transparent 60%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(253,224,71,0.18), transparent 60%)' }}
       />
       <div
         aria-hidden
         className="absolute -bottom-40 -left-40 h-[460px] w-[460px] rounded-full blur-3xl"
-        style={{ background: 'radial-gradient(circle, rgba(245,180,64,0.12), transparent 60%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(244,114,182,0.18), transparent 60%)' }}
       />
 
       <div className="relative grid lg:grid-cols-[1.05fr_1fr] min-h-screen">

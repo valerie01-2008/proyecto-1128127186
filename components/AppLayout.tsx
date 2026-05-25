@@ -119,12 +119,12 @@ export function AppLayout({ children, userRole, userName }: AppLayoutProps) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — fija en todas las resoluciones, el main usa lg:pl-72 */}
       <aside
         className={[
           'fixed inset-y-0 left-0 z-50 w-72 bg-ink-1 border-r border-ink-3 flex flex-col',
           'transform transition-transform duration-300 ease-out',
-          'lg:translate-x-0 lg:static lg:inset-auto',
+          'lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         ].join(' ')}
       >

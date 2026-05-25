@@ -3,59 +3,59 @@
 @tailwind utilities;
 
 /*
-  AgendaPro — Editorial Nocturno
-  display: Fraunces (serif con contraste editorial)
-  body:    Geist / system sans
-  mono:    JetBrains Mono
-  paleta:  fondo casi negro · acento lima radiactivo · ámbar para alertas
+  AgendaPro — Twilight Violet (versión sobria del home original)
+  bg:       violet-700 → purple-800 → indigo-900
+  surfaces: violet-900/80 sólido
+  acento:   yellow-300 (botones) · gradiente yellow→pink (headlines)
+  fonts:    Fraunces (display) + Geist (body) + JetBrains Mono
 */
 
 :root {
-  /* Surfaces */
-  --ink-0: #07070a;            /* fondo profundo (página) */
-  --ink-1: #0c0d10;            /* tarjetas */
-  --ink-2: #14161b;            /* tarjetas elevadas / hover */
-  --ink-3: #1c1f26;            /* bordes principales */
-  --ink-4: #2a2e38;            /* bordes secundarios */
+  /* Surfaces (los nombres "ink/bone/lime" se conservan como tokens neutros) */
+  --ink-0: #1a0a3e;            /* fallback bajo el gradiente */
+  --ink-1: rgba(46, 16, 101, 0.78);   /* violet-950/78 — cards sólidas */
+  --ink-2: rgba(67, 31, 138, 0.80);   /* hover */
+  --ink-3: rgba(255, 255, 255, 0.14); /* borde principal */
+  --ink-4: rgba(255, 255, 255, 0.22); /* borde secundario / fuerte */
 
   /* Texto */
-  --bone-0: #f5f1e6;           /* texto principal (cálido, no blanco puro) */
-  --bone-1: #d4cfc1;           /* texto secundario */
-  --bone-2: #8e8a7e;           /* muted */
-  --bone-3: #5a5851;           /* footers / metadata */
+  --bone-0: #ffffff;
+  --bone-1: #f5f3ff;           /* violet-50 */
+  --bone-2: #ddd6fe;           /* violet-200 */
+  --bone-3: #a78bfa;           /* violet-400 */
 
-  /* Accents */
-  --lime: #c8ff3a;             /* acento radiactivo */
-  --lime-soft: #1f2a07;        /* lime al 12% sobre negro */
-  --amber: #f5b440;            /* alerta suave */
-  --amber-soft: #2a1f08;
-  --crimson: #ff5757;          /* peligro */
-  --crimson-soft: #2b0d0d;
-  --sky: #7dc8ff;              /* info / linked */
+  /* Acentos */
+  --lime: #fde047;             /* yellow-300 — botones primarios */
+  --lime-soft: rgba(253, 224, 71, 0.16);
+  --amber: #fbbf24;            /* amber-400 — alertas */
+  --amber-soft: rgba(251, 191, 36, 0.14);
+  --crimson: #fda4af;          /* rose-300 — peligro */
+  --crimson-soft: rgba(253, 164, 175, 0.14);
+  --sky: #a5b4fc;              /* indigo-300 — info */
 
-  /* Categorías de evento */
-  --cat-personal: #c8ff3a;
-  --cat-trabajo:  #7dc8ff;
-  --cat-salud:    #ff9bd2;
-  --cat-educacion: #f5b440;
-  --cat-otro:     #8e8a7e;
+  /* Categorías (todas legibles sobre violet) */
+  --cat-personal:  #c4b5fd;    /* violet-300 */
+  --cat-trabajo:   #7dd3fc;    /* sky-300 */
+  --cat-salud:     #f9a8d4;    /* pink-300 */
+  --cat-educacion: #fcd34d;    /* amber-300 */
+  --cat-otro:      #cbd5e1;    /* slate-300 */
 
   /* Prioridad */
-  --prio-normal: #8e8a7e;
-  --prio-alta: #f5b440;
-  --prio-urgente: #ff5757;
+  --prio-normal:  #cbd5e1;
+  --prio-alta:    #fcd34d;
+  --prio-urgente: #fda4af;
 
   /* Tipografía */
   --font-display: 'Fraunces', 'Times New Roman', serif;
   --font-body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Radius / shadow / motion */
+  /* Radius / motion */
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 16px;
-  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 24px 60px -20px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 24px 60px -20px rgba(46, 16, 101, 0.6);
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -76,14 +76,16 @@ body {
 
 body {
   min-height: 100vh;
-  background-image:
-    radial-gradient(1200px 600px at 85% -10%, rgba(200, 255, 58, 0.06), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, rgba(245, 180, 64, 0.04), transparent 60%);
+  background:
+    radial-gradient(1200px 700px at 90% -10%, rgba(168, 85, 247, 0.35), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgba(99, 102, 241, 0.30), transparent 60%),
+    linear-gradient(135deg, #6d28d9 0%, #6b21a8 45%, #312e81 100%);
+  background-attachment: fixed;
 }
 
 ::selection {
   background: var(--lime);
-  color: var(--ink-0);
+  color: #1a0a3e;
 }
 
 h1, h2, h3, h4 {
@@ -101,10 +103,7 @@ a {
   text-decoration: none;
 }
 
-button {
-  font-family: var(--font-body);
-}
-
+button,
 input,
 textarea,
 select {
@@ -119,11 +118,12 @@ textarea::placeholder { color: var(--bone-3); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--ink-3);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  border: 2px solid var(--ink-0);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.20); background-clip: padding-box; }
 
 /* ─── Utility classes propias ───────────────────────────────────────── */
 
@@ -148,20 +148,26 @@ textarea::placeholder { color: var(--bone-3); }
   font-family: var(--font-mono);
   font-size: 11px;
   border: 1px solid var(--ink-3);
-  background: var(--ink-1);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--bone-1);
   padding: 1px 6px;
   border-radius: 4px;
 }
 
-/* Animación de entrada para listas */
+/* Gradiente de acento (yellow → pink) para palabras destacadas */
+.text-accent-gradient {
+  background: linear-gradient(90deg, #fde68a 0%, #fbcfe8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 @keyframes ap-fade-up {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.ap-fade-up {
-  animation: ap-fade-up 480ms var(--ease) both;
-}
+.ap-fade-up { animation: ap-fade-up 480ms var(--ease) both; }
 
 @keyframes ap-pulse-dot {
   0%, 100% { opacity: 1; }
