@@ -11,6 +11,7 @@ import {
   IconBell,
   IconReports,
   IconAdmin,
+  IconShield,
   IconUser,
   IconLogout,
   IconMenu,
@@ -44,6 +45,7 @@ const secondaryNav: NavItem[] = [
 const adminNav: NavItem[] = [
   { name: 'Admin · Usuarios', href: '/admin/users', Icon: IconUser },
   { name: 'Admin · Reportes', href: '/admin/reports', Icon: IconReports },
+  { name: 'Admin · Auditoría', href: '/admin/audit', Icon: IconShield },
   { name: 'Admin · Config', href: '/admin/config', Icon: IconAdmin },
 ];
 

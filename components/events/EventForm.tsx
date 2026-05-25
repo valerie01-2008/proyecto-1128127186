@@ -2,13 +2,17 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Event, EventCategory, EventPriority } from '@/lib/types';
+import { Event, EventCategory, EventPriority, CreateReminderRequest } from '@/lib/types';
 import {
   IconClock,
   IconLocation,
   IconTag,
   IconFlag,
   IconArrowRight,
+  IconBell,
+  IconPlus,
+  IconClose,
+  IconMail,
 } from '@/components/icons';
 
 interface SubmitData {
@@ -19,10 +23,12 @@ interface SubmitData {
   description?: string;
   category: EventCategory;
   priority: EventPriority;
+  reminders?: CreateReminderRequest[];
 }
 
 interface EventFormProps {
   event?: Event;
+  initialReminders?: CreateReminderRequest[];
   onSubmit: (data: SubmitData) => Promise<void>;
   isLoading?: boolean;
 }
@@ -41,7 +47,26 @@ const PRIORITIES: [EventPriority, string, string][] = [
   ['urgente', 'Urgente', 'var(--prio-urgente)'],
 ];
 
-export default function EventForm({ event, onSubmit, isLoading = false }: EventFormProps) {
+// Anticipaciones soportadas por el motor (RF-10)
+const ANTICIPATIONS: [number, string][] = [
+  [5, '5 min antes'],
+  [15, '15 min antes'],
+  [30, '30 min antes'],
+  [60, '1 hora antes'],
+  [180, '3 horas antes'],
+  [1440, '1 día antes'],
+  [2880, '2 días antes'],
+  [10080, '1 semana antes'],
+];
+
+const MAX_REMINDERS = 5;
+
+export default function EventForm({
+  event,
+  initialReminders = [],
+  onSubmit,
+  isLoading = false,
+}: EventFormProps) {
   const router = useRouter();
 
   const [form, setForm] = useState<{
@@ -62,8 +87,24 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
     priority: (event?.priority as EventPriority) || 'normal',
   });
 
+  const [reminders, setReminders] = useState<CreateReminderRequest[]>(initialReminders);
+
   const handle = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
+
+  const addReminder = () => {
+    if (reminders.length >= MAX_REMINDERS) return;
+    setReminders((p) => [
+      ...p,
+      { anticipationMin: 60, channel: 'email', customMessage: '' },
+    ]);
+  };
+
+  const updateReminder = (i: number, patch: Partial<CreateReminderRequest>) =>
+    setReminders((p) => p.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+
+  const removeReminder = (i: number) =>
+    setReminders((p) => p.filter((_, idx) => idx !== i));
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -71,13 +112,20 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
       ...form,
       startAt: new Date(form.startAt).toISOString(),
       endAt: form.endAt ? new Date(form.endAt).toISOString() : undefined,
+      reminders: reminders.length
+        ? reminders.map((r) => ({
+            anticipationMin: r.anticipationMin,
+            channel: 'email',
+            customMessage: r.customMessage?.trim() || undefined,
+          }))
+        : undefined,
     };
     await onSubmit(payload);
   }
 
   return (
     <form onSubmit={submit} className="space-y-10">
-      {/* Title — big editorial */}
+      {/* Title */}
       <Section eyebrow="01 · Título" hint="Cómo se llamará tu evento.">
         <input
           type="text"
@@ -91,7 +139,6 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
         <p className="font-mono text-[11px] text-bone-3 mt-2">{form.title.length}/200</p>
       </Section>
 
-      {/* Date / time */}
       <Section eyebrow="02 · Cuándo" hint="Las fechas se guardan en UTC y se muestran en tu zona horaria.">
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="Inicio" icon={<IconClock size={14} />}>
@@ -114,7 +161,6 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
         </div>
       </Section>
 
-      {/* Location */}
       <Section eyebrow="03 · Dónde" hint="Ubicación física, URL de meeting o lugar.">
         <Field label="Lugar" icon={<IconLocation size={14} />}>
           <input
@@ -127,7 +173,6 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
         </Field>
       </Section>
 
-      {/* Description */}
       <Section eyebrow="04 · Detalle" hint="Notas, agenda, links de referencia.">
         <textarea
           value={form.description}
@@ -138,7 +183,6 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
         />
       </Section>
 
-      {/* Category */}
       <Section eyebrow="05 · Categoría" hint="Color y etiqueta que verás en el calendario.">
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map(([v, l]) => (
@@ -162,7 +206,6 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
         </div>
       </Section>
 
-      {/* Priority */}
       <Section eyebrow="06 · Prioridad" hint="Solo afecta el color de la etiqueta y el orden.">
         <div className="flex gap-2">
           {PRIORITIES.map(([v, l, color]) => {
@@ -186,7 +229,104 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
         </div>
       </Section>
 
-      {/* Actions */}
+      <Section
+        eyebrow="07 · Recordatorios"
+        hint={`Hasta ${MAX_REMINDERS} recordatorios por evento. El motor evalúa cada 5 min y envía correo respetando tu ventana 06:00–22:00.`}
+      >
+        {reminders.length === 0 ? (
+          <div className="border border-dashed border-ink-3 rounded-lg p-6 bg-ink-1/40 text-center">
+            <p className="text-bone-2 text-sm mb-4">
+              Sin recordatorios todavía. Sin ellos, el evento no notifica.
+            </p>
+            <button
+              type="button"
+              onClick={addReminder}
+              className="inline-flex items-center gap-2 h-10 px-4 rounded border border-ink-3 text-bone-1 hover:text-bone-0 hover:border-ink-4 hover:bg-ink-2 transition-colors text-sm"
+            >
+              <IconPlus size={16} /> Añadir recordatorio
+            </button>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {reminders.map((r, i) => (
+              <li
+                key={i}
+                className="ap-fade-up bg-ink-1 border border-ink-3 rounded-lg p-4"
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-bone-3">
+                      <IconBell size={16} />
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-ticker text-bone-3">
+                      Recordatorio · {String(i + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeReminder(i)}
+                    className="text-bone-3 hover:text-crimson p-1.5 rounded hover:bg-ink-2 transition-colors"
+                    aria-label="Eliminar recordatorio"
+                  >
+                    <IconClose size={16} />
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-[1fr_1.4fr] gap-3">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-ticker text-bone-3 mb-1">
+                      Anticipación
+                    </p>
+                    <select
+                      value={r.anticipationMin}
+                      onChange={(e) =>
+                        updateReminder(i, { anticipationMin: parseInt(e.target.value, 10) })
+                      }
+                      className="w-full h-10 px-3 bg-ink-2 border border-ink-3 rounded text-sm text-bone-0 outline-none focus:border-lime/60 cursor-pointer"
+                    >
+                      {ANTICIPATIONS.map(([v, l]) => (
+                        <option key={v} value={v} className="bg-ink-1">
+                          {l}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-ticker text-bone-3 mb-1">
+                      Mensaje (opcional)
+                    </p>
+                    <div className="bg-ink-2 border border-ink-3 rounded h-10 px-3 flex items-center gap-2 focus-within:border-lime/60 transition-colors">
+                      <IconMail size={14} className="text-bone-3 shrink-0" />
+                      <input
+                        type="text"
+                        value={r.customMessage || ''}
+                        onChange={(e) => updateReminder(i, { customMessage: e.target.value })}
+                        placeholder="Texto del correo"
+                        maxLength={500}
+                        className="w-full bg-transparent text-bone-0 placeholder:text-bone-3 outline-none text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))}
+
+            {reminders.length < MAX_REMINDERS && (
+              <li>
+                <button
+                  type="button"
+                  onClick={addReminder}
+                  className="w-full inline-flex items-center justify-center gap-2 h-11 rounded border border-dashed border-ink-3 text-bone-2 hover:text-bone-0 hover:border-ink-4 hover:bg-ink-1 transition-colors text-sm"
+                >
+                  <IconPlus size={16} /> Añadir otro ({reminders.length}/{MAX_REMINDERS})
+                </button>
+              </li>
+            )}
+          </ul>
+        )}
+      </Section>
+
       <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6 border-t border-ink-3">
         <button
           type="button"
