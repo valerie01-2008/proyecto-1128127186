@@ -45,7 +45,6 @@ const adminNav: NavItem[] = [
   { name: 'Admin · Usuarios', href: '/admin/users', Icon: IconUser },
   { name: 'Admin · Reportes', href: '/admin/reports', Icon: IconReports },
   { name: 'Admin · Config', href: '/admin/config', Icon: IconAdmin },
-  { name: 'Admin · BD', href: '/admin/db-setup', Icon: IconAdmin },
 ];
 
 export function AppLayout({ children, userRole, userName }: AppLayoutProps) {
