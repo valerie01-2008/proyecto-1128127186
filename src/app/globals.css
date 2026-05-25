@@ -1,9 +1,10 @@
-/* Optimizado para Vercel: importación con preflight deshabilitado */
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Paleta de colores AgendaPro */
   --color-bg-primary: #FAFAFA;
   --color-bg-card: #FFFFFF;
   --color-bg-alt: #F5F3FF;
@@ -26,12 +27,6 @@
   --color-banner-seed-bg: #FEF3C7;
   --color-banner-seed-text: #92400E;
   --color-banner-seed-border: #F59E0B;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
