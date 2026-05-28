@@ -16,70 +16,39 @@ export const GET = withAuth(async (request: NextRequest, userId: string) => {
       }
     }
 
-    // Construir la query correctamente
-    let notifications;
+    // Query simple y directa
+    let query = `
+      SELECT
+        nl.id,
+        nl.reminder_id,
+        nl.sent_at,
+        nl.status,
+        nl.error_detail,
+        nl.user_id,
+        nl.channel
+      FROM notification_log nl
+    `;
+
     if (!global) {
-      notifications = await sql`
-        SELECT
-          nl.id,
-          nl.reminder_id,
-          nl.sent_at,
-          nl.status,
-          nl.error_detail,
-          r.event_id,
-          r.anticipation_min,
-          r.channel,
-          e.title as event_title,
-          u.name as user_name,
-          u.email as user_email
-        FROM notification_log nl
-        JOIN reminders r ON nl.reminder_id = r.id
-        JOIN events e ON r.event_id = e.id
-        JOIN users u ON r.user_id = u.id
-        WHERE r.user_id = ${userId}
-        ORDER BY nl.sent_at DESC
-        LIMIT 100
-      `;
-    } else {
-      notifications = await sql`
-        SELECT
-          nl.id,
-          nl.reminder_id,
-          nl.sent_at,
-          nl.status,
-          nl.error_detail,
-          r.event_id,
-          r.anticipation_min,
-          r.channel,
-          e.title as event_title,
-          u.name as user_name,
-          u.email as user_email
-        FROM notification_log nl
-        JOIN reminders r ON nl.reminder_id = r.id
-        JOIN events e ON r.event_id = e.id
-        JOIN users u ON r.user_id = u.id
-        ORDER BY nl.sent_at DESC
-        LIMIT 100
-      `;
+      query += ` WHERE nl.user_id = '${userId}'`;
     }
 
-    const formattedNotifications = notifications.map((row: any) => ({
+    query += ` ORDER BY nl.sent_at DESC LIMIT 100`;
+
+    const notifications = await sql.unsafe(query);
+
+    const formattedNotifications = (notifications as any[]).map((row: any) => ({
       id: row.id,
       reminderId: row.reminder_id,
       sentAt: row.sent_at,
       status: row.status,
       errorDetail: row.error_detail,
-      eventId: row.event_id,
-      anticipationMin: row.anticipation_min,
       channel: row.channel,
-      eventTitle: global ? row.event_title : undefined,
-      userName: global ? row.user_name : undefined,
-      userEmail: global ? row.user_email : undefined,
     }));
 
     return NextResponse.json({ notifications: formattedNotifications });
   } catch (error) {
     console.error('Error fetching notifications:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return NextResponse.json({ error: 'Error interno del servidor', details: (error as any).message }, { status: 500 });
   }
 });
