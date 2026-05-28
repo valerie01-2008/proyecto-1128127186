@@ -10,25 +10,20 @@ export const GET = withRole(['admin'])(async (_request: NextRequest) => {
   try {
     const users = await sql`
       SELECT
-        id,
-        name,
-        email,
-        role,
-        timezone,
-        active,
-        created_at,
+        u.id,
+        u.name,
+        u.email,
+        u.role,
+        u.timezone,
+        u.active,
+        u.created_at,
         (
           SELECT COUNT(*)
           FROM events
-          WHERE events.user_id = users.id AND events.status = 'pendiente'
-        ) as active_events_count,
-        (
-          SELECT MAX(created_at)
-          FROM user_sessions
-          WHERE user_sessions.user_id = users.id
-        ) as last_session
-      FROM users
-      ORDER BY created_at DESC
+          WHERE events.user_id = u.id AND events.status = 'pendiente'
+        ) AS active_events_count
+      FROM users u
+      ORDER BY u.created_at DESC
     `;
 
     const formattedUsers = users.map((user: any) => ({
@@ -40,7 +35,7 @@ export const GET = withRole(['admin'])(async (_request: NextRequest) => {
       active: user.active,
       createdAt: user.created_at,
       activeEventsCount: parseInt(user.active_events_count) || 0,
-      lastSession: user.last_session,
+      lastSession: null,
     }));
 
     return NextResponse.json(formattedUsers);
@@ -74,8 +69,8 @@ export const POST = withRole(['admin'])(async (request: NextRequest, userId: str
 
     // Crear usuario
     const newUser = await sql`
-      INSERT INTO users (name, email, password_hash, role, timezone, must_change_password, active)
-      VALUES (${name}, ${email}, ${passwordHash}, 'user', ${timezone}, true, true)
+      INSERT INTO users (name, email, password_hash, role, timezone, active)
+      VALUES (${name}, ${email}, ${passwordHash}, 'user', ${timezone}, true)
       RETURNING id, name, email, role, timezone, created_at
     `;
 

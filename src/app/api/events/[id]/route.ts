@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import { withAuth } from '@/lib/withAuth';
 import { getEventById, updateEvent, deleteEvent } from '@/lib/dataService';
 import type { UpdateEventRequest } from '@/lib/types';
@@ -49,11 +50,14 @@ export const PUT = withAuth(async (request: NextRequest, userId: string, context
   } catch (error) {
     console.error('Error updating event:', error);
 
+    if (error instanceof ZodError || (error as { name?: string } | null)?.name === 'ZodError') {
+      const zErr = error as ZodError;
+      const first = zErr.issues?.[0];
+      const message = first ? `${first.path.join('.')}: ${first.message}` : 'Datos inválidos';
+      return NextResponse.json({ error: message, issues: zErr.issues }, { status: 400 });
+    }
     if (error instanceof Error && error.message.includes('solapa')) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 409 } // Conflict
-      );
+      return NextResponse.json({ error: error.message }, { status: 409 });
     }
 
     return NextResponse.json(

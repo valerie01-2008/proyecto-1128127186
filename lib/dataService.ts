@@ -47,9 +47,21 @@ export function readAppConfig(): AppConfig {
  * Obtiene el modo del sistema (seed o live)
  */
 export async function getSystemMode(): Promise<'seed' | 'live'> {
-  // TODO: Implementar lógica real para determinar el modo
-  // Por ahora, siempre retorna 'seed'
-  return 'seed';
+  // 'live' cuando Supabase está configurado Y las migrations principales están aplicadas.
+  if (!process.env.POSTGRES_URL && !process.env.POSTGRES_PRISMA_URL) {
+    return 'seed';
+  }
+  try {
+    const result = await sql<{ count: string }[]>`
+      SELECT COUNT(*)::text AS count
+        FROM information_schema.tables
+       WHERE table_schema = 'public'
+         AND table_name IN ('users', 'events', 'reminders')
+    `;
+    return Number(result[0]?.count ?? 0) >= 3 ? 'live' : 'seed';
+  } catch {
+    return 'seed';
+  }
 }
 
 /**
@@ -83,11 +95,53 @@ export async function getUserById(id: string): Promise<any> {
 }
 
 /**
- * Registra una operación en la auditoría
+ * Registra una operación en la auditoría — persistida en Supabase (Vercel no
+ * permite escritura en disco fuera de /tmp, así que evitamos Blob/FS).
  */
-export async function recordAudit(operation: string, userId?: string, details?: any): Promise<void> {
-  // TODO: Implementar auditoría real
-  console.log('Audit:', { operation, userId, details, timestamp: new Date() });
+export async function recordAudit(
+  operation: string,
+  userId?: string,
+  details?: any
+): Promise<void> {
+  try {
+    // Buscar email/role del usuario para enriquecer el log (best-effort).
+    let userEmail: string | null = null;
+    let userRole: string | null = null;
+    if (userId) {
+      const rows = await sql<
+        { email: string; role: string }[]
+      >`SELECT email, role FROM users WHERE id = ${userId} LIMIT 1`;
+      if (rows[0]) {
+        userEmail = rows[0].email;
+        userRole = rows[0].role;
+      }
+    }
+
+    const entity =
+      typeof details === 'object' && details && 'entity' in details
+        ? String(details.entity)
+        : null;
+    const entityId =
+      typeof details === 'object' && details && 'entityId' in details
+        ? String(details.entityId)
+        : null;
+    const summary =
+      typeof details === 'object' && details && 'summary' in details
+        ? String(details.summary)
+        : operation;
+
+    await sql`
+      INSERT INTO audit_log
+        (user_id, user_email, user_role, action, entity, entity_id, summary, metadata)
+      VALUES
+        (${userId ?? null}, ${userEmail}, ${userRole}, ${operation},
+         ${entity}, ${entityId}, ${summary},
+         ${JSON.stringify(details ?? {})}::jsonb)
+    `;
+  } catch (error) {
+    // Auditoría es best-effort — no rompemos la operación principal si falla.
+    console.error('[audit] failed to persist:', error);
+  }
 }
 
 // ========== FUNCIONES DE EVENTOS ==========
@@ -368,10 +422,10 @@ export async function createEvent(userId: string, data: CreateEventRequest): Pro
   // Validar datos
   const validatedData = CreateEventRequestSchema.parse(data);
 
-  // Verificar cuota de eventos activos (RN-15)
+  // Verificar cuota de eventos activos (RN-15: 500 según plan)
   const activeCount = await getActiveEventCount(userId);
-  if (activeCount >= 50) { // Asumiendo cuota máxima de 50 eventos activos
-    throw new Error('Has alcanzado el límite máximo de 50 eventos activos');
+  if (activeCount >= 500) {
+    throw new Error('Has alcanzado el límite máximo de 500 eventos activos');
   }
 
   // Verificar solapamiento (RN-07)

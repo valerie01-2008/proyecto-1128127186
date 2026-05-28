@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
@@ -21,18 +21,25 @@ export function Button({
   type = 'button',
   className = '',
 }: ButtonProps) {
-  const baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const base =
+    'inline-flex items-center justify-center gap-2 font-medium tracking-tight transition-[background,border-color,color,transform] duration-200 ease-out disabled:opacity-40 disabled:pointer-events-none select-none';
 
-  const variantClasses = {
-    primary: 'bg-gradient-to-r from-violet-500 to-pink-400 text-white hover:from-violet-600 hover:to-pink-500',
-    secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
+  const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
+    primary:
+      'bg-lime text-ink-0 hover:bg-bone-0 hover:-translate-y-px shadow-soft rounded',
+    secondary:
+      'bg-ink-2 text-bone-0 border border-ink-3 hover:bg-ink-3 rounded',
+    outline:
+      'bg-transparent text-bone-0 border border-ink-3 hover:border-bone-2 hover:bg-ink-1 rounded',
+    ghost: 'bg-transparent text-bone-1 hover:text-bone-0 hover:bg-ink-2 rounded',
+    danger:
+      'bg-crimson-soft text-crimson border border-crimson/40 hover:bg-crimson hover:text-ink-0 rounded',
   };
 
-  const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
+  const sizes: Record<NonNullable<ButtonProps['size']>, string> = {
+    sm: 'h-8 px-3 text-[13px]',
+    md: 'h-10 px-4 text-sm',
+    lg: 'h-12 px-6 text-[15px]',
   };
 
   return (
@@ -40,7 +47,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {children}
     </button>

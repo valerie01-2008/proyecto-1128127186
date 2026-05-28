@@ -1,51 +1,183 @@
-/* Optimizado para Vercel: importación con preflight deshabilitado */
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  AgendaPro — Twilight Violet (versión sobria del home original)
+  bg:       violet-700 → purple-800 → indigo-900
+  surfaces: violet-900/80 sólido
+  acento:   yellow-300 (botones) · gradiente yellow→pink (headlines)
+  fonts:    Fraunces (display) + Geist (body) + JetBrains Mono
+*/
 
 :root {
-  /* Paleta de colores AgendaPro */
-  --color-bg-primary: #FAFAFA;
-  --color-bg-card: #FFFFFF;
-  --color-bg-alt: #F5F3FF;
-  --color-primary: #8B5CF6;
-  --color-accent: #EC4899;
-  --color-text-primary: #1F2937;
-  --color-text-secondary: #6B7280;
-  --color-border: #E5E7EB;
-  --color-category-personal: #8B5CF6;
-  --color-category-work: #3B82F6;
-  --color-category-health: #10B981;
-  --color-category-education: #F59E0B;
-  --color-category-other: #6B7280;
-  --color-priority-normal: #6B7280;
-  --color-priority-high: #F59E0B;
-  --color-priority-urgent: #EF4444;
-  --color-notification-delivered: #10B981;
-  --color-notification-failed: #EF4444;
-  --color-notification-retrying: #F59E0B;
-  --color-banner-seed-bg: #FEF3C7;
-  --color-banner-seed-text: #92400E;
-  --color-banner-seed-border: #F59E0B;
+  /* Surfaces (los nombres "ink/bone/lime" se conservan como tokens neutros) */
+  --ink-0: #1a0a3e;            /* fallback bajo el gradiente */
+  --ink-1: rgba(46, 16, 101, 0.78);   /* violet-950/78 — cards sólidas */
+  --ink-2: rgba(67, 31, 138, 0.80);   /* hover */
+  --ink-3: rgba(255, 255, 255, 0.14); /* borde principal */
+  --ink-4: rgba(255, 255, 255, 0.22); /* borde secundario / fuerte */
+
+  /* Texto */
+  --bone-0: #ffffff;
+  --bone-1: #f5f3ff;           /* violet-50 */
+  --bone-2: #ddd6fe;           /* violet-200 */
+  --bone-3: #a78bfa;           /* violet-400 */
+
+  /* Acentos */
+  --lime: #fde047;             /* yellow-300 — botones primarios */
+  --lime-soft: rgba(253, 224, 71, 0.16);
+  --amber: #fbbf24;            /* amber-400 — alertas */
+  --amber-soft: rgba(251, 191, 36, 0.14);
+  --crimson: #fda4af;          /* rose-300 — peligro */
+  --crimson-soft: rgba(253, 164, 175, 0.14);
+  --sky: #a5b4fc;              /* indigo-300 — info */
+
+  /* Categorías (todas legibles sobre violet) */
+  --cat-personal:  #c4b5fd;    /* violet-300 */
+  --cat-trabajo:   #7dd3fc;    /* sky-300 */
+  --cat-salud:     #f9a8d4;    /* pink-300 */
+  --cat-educacion: #fcd34d;    /* amber-300 */
+  --cat-otro:      #cbd5e1;    /* slate-300 */
+
+  /* Prioridad */
+  --prio-normal:  #cbd5e1;
+  --prio-alta:    #fcd34d;
+  --prio-urgente: #fda4af;
+
+  /* Tipografía */
+  --font-display: 'Fraunces', 'Times New Roman', serif;
+  --font-body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Radius / motion */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 24px 60px -20px rgba(46, 16, 101, 0.6);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+}
+
+html,
+body {
+  background: var(--ink-0);
+  color: var(--bone-0);
+  font-family: var(--font-body);
+  font-feature-settings: 'ss01' on, 'cv11' on;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-family: 'Inter', sans-serif;
-  line-height: 1.6;
   min-height: 100vh;
+  background:
+    radial-gradient(1200px 700px at 90% -10%, rgba(168, 85, 247, 0.35), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgba(99, 102, 241, 0.30), transparent 60%),
+    linear-gradient(135deg, #6d28d9 0%, #6b21a8 45%, #312e81 100%);
+  background-attachment: fixed;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
+::selection {
+  background: var(--lime);
+  color: #1a0a3e;
 }
 
-button {
-  font-family: 'Inter', sans-serif;
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--bone-0);
+}
+h1 { font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.02; }
+h2 { font-size: clamp(1.5rem, 2.6vw, 2.25rem); line-height: 1.1; }
+h3 { font-size: clamp(1.2rem, 1.6vw, 1.5rem); line-height: 1.2; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-body);
+  color: var(--bone-0);
+}
+
+input::placeholder,
+textarea::placeholder { color: var(--bone-3); }
+
+/* Scrollbars sutiles */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.20); background-clip: padding-box; }
+
+/* ─── Utility classes propias ───────────────────────────────────────── */
+
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+
+.divider-rule {
+  border: 0;
+  border-top: 1px solid var(--ink-3);
+  margin: 0;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bone-2);
+}
+
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border: 1px solid var(--ink-3);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--bone-1);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* Gradiente de acento (yellow → pink) para palabras destacadas */
+.text-accent-gradient {
+  background: linear-gradient(90deg, #fde68a 0%, #fbcfe8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+@keyframes ap-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ap-fade-up { animation: ap-fade-up 480ms var(--ease) both; }
+
+@keyframes ap-pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.ap-pulse-dot { animation: ap-pulse-dot 2.4s ease-in-out infinite; }
+
+/* Focus ring consistente */
+:where(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }

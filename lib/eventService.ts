@@ -18,13 +18,16 @@ export async function detectOverlap(
   // Si no hay end_at, usar start_at + 1 hora como estimación
   const effectiveEndAt = endAt || new Date(startAt.getTime() + 60 * 60 * 1000);
 
+  // Para eventos existentes sin end_at usamos start_at + 1h como ventana
+  // (consistente con effectiveEndAt arriba). Sin esto, cualquier evento sin
+  // hora de fin "bloqueaba" todo el futuro porque end_at IS NULL pasaba siempre.
   let query = sql`
     SELECT id, title
     FROM events
     WHERE user_id = ${userId}
       AND status = 'pendiente'
       AND start_at < ${effectiveEndAt.toISOString()}
-      AND (end_at IS NULL OR end_at > ${startAt.toISOString()})
+      AND COALESCE(end_at, start_at + INTERVAL '1 hour') > ${startAt.toISOString()}
   `;
 
   if (excludeEventId) {

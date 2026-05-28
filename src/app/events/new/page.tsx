@@ -1,94 +1,110 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { AppLayout } from '@/components/AppLayout';
 import EventForm from '@/components/events/EventForm';
+import { IconChevronLeft } from '@/components/icons';
 import type { CreateEventRequest } from '@/lib/types';
+
+interface SessionUser {
+  name: string;
+  role: string;
+}
 
 export default function NewEventPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
 
-  const handleSubmit = async (data: CreateEventRequest) => {
-    setIsLoading(true);
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.user && setUser(d.user))
+      .catch(() => {});
+  }, []);
+
+  async function handleSubmit(data: CreateEventRequest) {
+    setLoading(true);
     setError(null);
     setWarning(null);
-
     try {
-      const response = await fetch('/api/events', {
+      const res = await fetch('/api/events', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 409) {
-          setWarning(errorData.error || 'Conflicto de solapamiento');
+      if (!res.ok) {
+        const err = await res.json();
+        if (res.status === 409) {
+          setWarning(err.error || 'Hay un conflicto de solapamiento.');
           return;
         }
-        throw new Error(errorData.error || 'Error al crear el evento');
+        throw new Error(err.error || 'No se pudo crear el evento');
       }
-
       router.push('/events');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Nuevo Evento</h1>
+    <AppLayout userRole={user?.role} userName={user?.name}>
+      <div className="px-6 lg:px-12 py-10 max-w-3xl mx-auto">
+        <Link
+          href="/events"
+          className="inline-flex items-center gap-1.5 text-bone-3 hover:text-bone-0 transition-colors text-sm mb-8 font-mono uppercase tracking-ticker text-[11px]"
+        >
+          <IconChevronLeft size={14} /> Volver a eventos
+        </Link>
+
+        <header className="ap-fade-up mb-10">
+          <p className="eyebrow mb-3">Nuevo · sección 04</p>
+          <h1 className="font-display tracking-editorial text-[clamp(2.5rem,5vw,4rem)] leading-none">
+            Planea algo
+            <br />
+            <span className="italic text-bone-2">memorable</span>
+            <span className="text-lime">.</span>
+          </h1>
+        </header>
+
+        {error && (
+          <Banner tone="crimson" title="No se pudo crear" body={error} />
+        )}
+        {warning && (
+          <Banner tone="amber" title="Solapamiento" body={warning} />
+        )}
+
+        <EventForm onSubmit={handleSubmit} isLoading={loading} />
       </div>
+    </AppLayout>
+  );
+}
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                Error al crear el evento
-              </h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {warning && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">
-                Advertencia de solapamiento
-              </h3>
-              <div className="mt-2 text-sm text-yellow-700">
-                <p>{warning}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <EventForm onSubmit={handleSubmit} isLoading={isLoading} />
+function Banner({
+  tone,
+  title,
+  body,
+}: {
+  tone: 'crimson' | 'amber';
+  title: string;
+  body: string;
+}) {
+  const colorClass =
+    tone === 'crimson'
+      ? 'border-crimson/30 bg-crimson-soft text-crimson'
+      : 'border-amber/30 bg-amber-soft text-amber';
+  return (
+    <div className={`mb-6 rounded border ${colorClass} p-4`}>
+      <p className="font-mono text-[11px] uppercase tracking-ticker mb-1">
+        {title}
+      </p>
+      <p className="text-bone-1 text-sm">{body}</p>
     </div>
   );
 }
