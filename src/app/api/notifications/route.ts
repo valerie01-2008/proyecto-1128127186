@@ -56,7 +56,7 @@ export const GET = withAuth(async (request: NextRequest, userId: string) => {
       userEmail: global ? row.user_email : undefined,
     }));
 
-    return NextResponse.json(formattedNotifications);
+    return NextResponse.json({ notifications: formattedNotifications });
   } catch (error) {
     console.error('Error fetching notifications:', error);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
