@@ -14,14 +14,14 @@ export const GET = withAuth(async (request: NextRequest, userId: string) => {
         nl.reminder_id,
         nl.sent_at,
         nl.status,
-        nl.error_message,
+        nl.error_detail,
         r.event_id,
         r.anticipation_min,
         r.channel,
         e.title as event_title,
         u.name as user_name,
         u.email as user_email
-      FROM notification_logs nl
+      FROM notification_log nl
       JOIN reminders r ON nl.reminder_id = r.id
       JOIN events e ON r.event_id = e.id
       JOIN users u ON r.user_id = u.id
@@ -47,11 +47,11 @@ export const GET = withAuth(async (request: NextRequest, userId: string) => {
       reminderId: row.reminder_id,
       sentAt: row.sent_at,
       status: row.status,
-      errorMessage: row.error_message,
+      errorDetail: row.error_detail,
       eventId: row.event_id,
       anticipationMin: row.anticipation_min,
       channel: row.channel,
-      eventTitle: global ? row.event_title : undefined, // Solo mostrar título si es admin
+      eventTitle: global ? row.event_title : undefined,
       userName: global ? row.user_name : undefined,
       userEmail: global ? row.user_email : undefined,
     }));
