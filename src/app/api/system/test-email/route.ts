@@ -7,7 +7,7 @@ import { sendReminderEmail } from '@/lib/emailService';
  * Envía un correo de prueba a la dirección del usuario autenticado
  * Requiere autenticación
  */
-export const POST = withAuth(async (request: NextRequest, userId: string) => {
+export const POST = withAuth(async (request: NextRequest) => {
   try {
     const { email } = await request.json();
 
