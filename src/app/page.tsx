@@ -130,37 +130,50 @@ export default function Home() {
           .
         </h1>
 
-        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-10 items-end">
-          <p
-            className="ap-fade-up text-bone-1 text-[18px] lg:text-[20px] leading-relaxed max-w-2xl"
-            style={{ animationDelay: '120ms' }}
-          >
-            AgendaPro es una agenda con carácter. Calendario en tres vistas,
-            recordatorios automáticos que se evalúan cada cinco minutos y un
-            motor que respeta tu ventana horaria. Sin gradientes innecesarios,
-            sin colores que gritan, sin emojis decorativos.
-          </p>
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-end">
+          <div>
+            <p
+              className="ap-fade-up text-bone-1 text-[18px] lg:text-[20px] leading-relaxed max-w-2xl"
+              style={{ animationDelay: '120ms' }}
+            >
+              AgendaPro es una agenda con carácter. Calendario en tres vistas,
+              recordatorios automáticos que se evalúan cada cinco minutos y un
+              motor que respeta tu ventana horaria. Sin gradientes innecesarios,
+              sin colores que gritan, sin emojis decorativos.
+            </p>
+
+            <div
+              className="ap-fade-up flex flex-wrap gap-3 mt-8"
+              style={{ animationDelay: '180ms' }}
+            >
+              <Link
+                href="/login"
+                className="group inline-flex items-center gap-2 h-12 px-6 rounded bg-lime text-ink-0 font-medium hover:bg-bone-0 transition-colors"
+              >
+                Ingresar a la agenda
+                <span className="transition-transform group-hover:translate-x-0.5">
+                  <IconArrowRight size={18} />
+                </span>
+              </Link>
+              <a
+                href="#features"
+                className="inline-flex items-center gap-2 h-12 px-6 rounded border border-ink-3 text-bone-1 hover:text-bone-0 hover:border-ink-4 hover:bg-ink-1 transition-colors"
+              >
+                Leer capítulos
+                <IconArrowUpRight size={16} />
+              </a>
+            </div>
+          </div>
 
           <div
-            className="ap-fade-up flex flex-wrap gap-3"
-            style={{ animationDelay: '180ms' }}
+            className="ap-fade-up hidden lg:block"
+            style={{ animationDelay: '240ms' }}
           >
-            <Link
-              href="/login"
-              className="group inline-flex items-center gap-2 h-12 px-6 rounded bg-lime text-ink-0 font-medium hover:bg-bone-0 transition-colors"
-            >
-              Ingresar a la agenda
-              <span className="transition-transform group-hover:translate-x-0.5">
-                <IconArrowRight size={18} />
-              </span>
-            </Link>
-            <a
-              href="#features"
-              className="inline-flex items-center gap-2 h-12 px-6 rounded border border-ink-3 text-bone-1 hover:text-bone-0 hover:border-ink-4 hover:bg-ink-1 transition-colors"
-            >
-              Leer capítulos
-              <IconArrowUpRight size={16} />
-            </a>
+            <img
+              src="/agendapro.png"
+              alt="AgendaPro - Vista de calendario y recordatorios"
+              className="w-full h-auto rounded-lg border border-ink-3 shadow-lg"
+            />
           </div>
         </div>
 
