@@ -136,11 +136,11 @@ export async function POST(request: NextRequest) {
           CREATE INDEX idx_reminders_status ON reminders(status);
         `,
       },
-      // Tabla: notification_logs
+      // Tabla: notification_log
       {
-        name: 'notification_logs',
+        name: 'notification_log',
         sql: `
-          CREATE TABLE IF NOT EXISTS notification_logs (
+          CREATE TABLE IF NOT EXISTS notification_log (
             id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
             reminder_id uuid NOT NULL REFERENCES reminders(id) ON DELETE CASCADE,
             event_id uuid NOT NULL REFERENCES events(id) ON DELETE CASCADE,
@@ -154,11 +154,11 @@ export async function POST(request: NextRequest) {
             message_sent text,
             created_at timestamp with time zone DEFAULT now()
           );
-          ALTER TABLE notification_logs ENABLE ROW LEVEL SECURITY;
-          CREATE POLICY service_role_all ON notification_logs FOR ALL TO service_role USING (true) WITH CHECK (true);
-          CREATE INDEX idx_notification_logs_user_id ON notification_logs(user_id);
-          CREATE INDEX idx_notification_logs_reminder_id ON notification_logs(reminder_id);
-          CREATE INDEX idx_notification_logs_status ON notification_logs(status);
+          ALTER TABLE notification_log ENABLE ROW LEVEL SECURITY;
+          CREATE POLICY service_role_all ON notification_log FOR ALL TO service_role USING (true) WITH CHECK (true);
+          CREATE INDEX idx_notification_log_user_id ON notification_log(user_id);
+          CREATE INDEX idx_notification_log_reminder_id ON notification_log(reminder_id);
+          CREATE INDEX idx_notification_log_status ON notification_log(status);
         `,
       },
       // Tabla: event_attachments
