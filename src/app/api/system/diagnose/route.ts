@@ -16,8 +16,8 @@ export const GET = withRole(['admin'])(async () => {
       resendMessage = 'RESEND_API_KEY no está configurada';
     } else {
       try {
-        const resend = new Resend(resendApiKey);
-        // Intentar obtener información de la API key validando su formato
+        // Validar que la API key tenga un formato válido
+        new Resend(resendApiKey);
         resendStatus = 'ok';
         resendMessage = `API key configurada. From: ${resendFromEmail}`;
       } catch (e) {
